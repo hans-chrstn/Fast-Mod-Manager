@@ -1,0 +1,16 @@
+build/
+.cache/
+compile_commands.json
+CMakeUserPresets.json
+.envrc.local
+.direnv/
+result
+result-*
+.vscode/
+.idea/
+*.user
+*.user.*
+*.swp
+*.swo
+*~
+.DS_Store
