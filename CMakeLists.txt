@@ -16,11 +16,108 @@ find_package(Qt6 CONFIG REQUIRED COMPONENTS Core Gui Widgets)
 
 qt_standard_project_setup()
 
+add_library(domain OBJECT
+  src/domain/ProfileIdentity.cpp
+)
+target_include_directories(domain PUBLIC src)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(domain PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
+add_library(core OBJECT
+)
+target_include_directories(core PUBLIC src)
+target_link_libraries(core PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(core PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
+add_library(application OBJECT
+  src/application/FakeInventoryService.hpp
+)
+target_include_directories(application PUBLIC src)
+target_link_libraries(application PUBLIC domain core)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(application PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
+add_library(infrastructure OBJECT
+  src/infrastructure/JsonProfilePersistence.cpp
+  src/infrastructure/StubScriptEngine.cpp
+  src/infrastructure/StubProcessLauncher.cpp
+)
+target_include_directories(infrastructure PUBLIC src)
+target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(infrastructure PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
+add_library(ui OBJECT
+  src/ui/InventoryModel.cpp
+  src/ui/MainWindow.cpp
+)
+target_include_directories(ui PUBLIC src)
+target_link_libraries(ui PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain application)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(ui PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
+add_library(app OBJECT
+  src/app/Bootstrapper.cpp
+)
+target_include_directories(app PUBLIC src)
+target_link_libraries(app PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core application infrastructure ui)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(app PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
 add_executable(mod-manager
   src/main.cpp
 )
 
-target_link_libraries(mod-manager PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(mod-manager PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets domain core application infrastructure ui app)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(mod-manager PRIVATE
@@ -44,3 +141,4 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS mod-manager RUNTIME DESTINATION bin)
+

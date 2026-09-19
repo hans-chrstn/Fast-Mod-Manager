@@ -25,5 +25,5 @@ if (( ${#source_files[@]} == 0 )); then
   exit 0
 fi
 
-clang-tidy -p "build/$preset" "${source_files[@]}"
-cppcheck --project="$compile_commands" --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem
+clang-tidy --quiet -p "build/$preset" "${source_files[@]}" 2>/dev/null
+cppcheck --project="$compile_commands" -i "$PROJECT_SOURCE_ROOT/build" --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem
