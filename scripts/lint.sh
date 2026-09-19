@@ -25,5 +25,5 @@ if (( ${#source_files[@]} == 0 )); then
   exit 0
 fi
 
-clang-tidy --quiet -p "build/$preset" "${source_files[@]}" 2>/dev/null
+printf "%s\n" "${source_files[@]}" | xargs -I{} -P "$(nproc)" clang-tidy --quiet -p "build/$preset" "$PROJECT_SOURCE_ROOT/{}" 2>/dev/null
 cppcheck --project="$compile_commands" -i "$PROJECT_SOURCE_ROOT/build" --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem

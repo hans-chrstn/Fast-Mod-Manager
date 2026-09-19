@@ -1,0 +1,2 @@
+InheritParentConfig: true
+Checks: '-readability-function-cognitive-complexity, -readability-magic-numbers, -bugprone-infinite-loop, -modernize-avoid-c-arrays, -modernize-use-trailing-return-type, -cppcoreguidelines-avoid-magic-numbers, -performance-unnecessary-value-param, -readability-identifier-length'

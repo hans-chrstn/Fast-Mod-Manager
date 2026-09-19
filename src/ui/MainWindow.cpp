@@ -5,9 +5,11 @@
 #include <QAction>
 #include <QApplication>
 #include <QKeySequence>
+#include <QLineEdit>
 #include <QListView>
 #include <QMenu>
 #include <QMenuBar>
+#include <QSortFilterProxyModel>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -32,8 +34,19 @@ void MainWindow::setupUi() {
   auto* central_widget = new QWidget(this);
   auto* layout = new QVBoxLayout(central_widget);
 
+  m_search_bar = new QLineEdit(central_widget);
+  m_search_bar->setPlaceholderText(QStringLiteral("Filter mods..."));
+  layout->addWidget(m_search_bar);
+
+  m_proxy_model = new QSortFilterProxyModel(this);
+  m_proxy_model->setSourceModel(m_inventory_model);
+  m_proxy_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+  connect(m_search_bar, &QLineEdit::textChanged, m_proxy_model,
+          &QSortFilterProxyModel::setFilterFixedString);
+
   m_list_view = new QListView(central_widget);
-  m_list_view->setModel(m_inventory_model);
+  m_list_view->setModel(m_proxy_model);
   layout->addWidget(m_list_view);
 
   setCentralWidget(central_widget);

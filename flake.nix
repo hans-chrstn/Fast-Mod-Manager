@@ -27,6 +27,8 @@
           pkgs.qt6.qtbase
           pkgs.qt6.qtwayland
           pkgs.qt6.qtsvg
+          pkgs.bubblewrap
+          pkgs.just
           llvm.clang
           pkgs.clang-tools
         ];
@@ -75,6 +77,8 @@
             pkgs.qt6.qtbase
             pkgs.qt6.qtwayland
             pkgs.qt6.qtsvg
+            pkgs.bubblewrap
+            pkgs.just
             pkgs.ripgrep
             pkgs.shellcheck
           ];

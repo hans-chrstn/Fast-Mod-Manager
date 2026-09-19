@@ -8,19 +8,23 @@ add_executable(mod-manager-tests
   unit/service_registry_test.cpp
   unit/script_engine_test.cpp
   unit/process_launcher_test.cpp
+  unit/fixture_filesystem_scanner_test.cpp
+  unit/async_task_test.cpp
 )
 
 target_link_libraries(mod-manager-tests
-  PRIVATE
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    domain
-    core
-    application
-    infrastructure
-    ui
+    domain core application infrastructure ui
     Catch2::Catch2WithMain
+    Qt6::Core Qt6::Gui Qt6::Widgets
+)
+
+add_executable(async-test-app
+    async_test_app.cpp
+)
+
+target_link_libraries(async-test-app
+    domain core application infrastructure ui
+    Qt6::Core Qt6::Gui Qt6::Widgets
 )
 
 include(Catch)

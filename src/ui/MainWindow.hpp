@@ -3,6 +3,8 @@
 #include <QMainWindow>
 
 class QListView;
+class QLineEdit;
+class QSortFilterProxyModel;
 
 namespace ui {
 
@@ -19,6 +21,8 @@ private:
   void setupUi();
 
   InventoryModel* m_inventory_model;
+  QSortFilterProxyModel* m_proxy_model{nullptr};
+  QLineEdit* m_search_bar{nullptr};
   QListView* m_list_view{nullptr};
 };
 

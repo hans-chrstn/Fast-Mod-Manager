@@ -2,8 +2,10 @@
 
 #include "application/FakeInventoryService.hpp"
 #include "application/InventoryService.hpp"
+#include "core/IModScanner.hpp"
 #include "core/IProcessLauncher.hpp"
 #include "core/IScriptEngine.hpp"
+#include "infrastructure/FixtureFilesystemScanner.hpp"
 #include "infrastructure/StubProcessLauncher.hpp"
 #include "infrastructure/StubScriptEngine.hpp"
 #include "ui/InventoryModel.hpp"
@@ -21,6 +23,9 @@ Bootstrapper::Bootstrapper(int& argc, char** argv) : m_application(argc, argv) {
 Bootstrapper::~Bootstrapper() = default;
 
 void Bootstrapper::buildServiceGraph() {
+  m_registry.registerService<fmm::core::IModScanner>(
+      std::make_shared<fmm::infrastructure::FixtureFilesystemScanner>());
+
   m_registry.registerService<core::IProcessLauncher>(
       std::make_shared<infrastructure::StubProcessLauncher>());
 
@@ -28,7 +33,8 @@ void Bootstrapper::buildServiceGraph() {
       std::make_shared<infrastructure::StubScriptEngine>());
 
   m_registry.registerService<application::InventoryService>(
-      std::make_shared<application::FakeInventoryService>());
+      std::make_shared<application::FakeInventoryService>(
+          m_registry.resolve<fmm::core::IModScanner>()));
 
   m_inventory_model = std::make_unique<ui::InventoryModel>(
       m_registry.resolve<application::InventoryService>(), nullptr);

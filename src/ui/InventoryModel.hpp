@@ -29,7 +29,7 @@ public:
 
 private:
   std::shared_ptr<application::InventoryService> m_inventory_service;
-  std::vector<domain::ModIdentity> m_mods;
+  std::vector<fmm::domain::ModIdentity> m_mods;
 };
 
 } // namespace ui

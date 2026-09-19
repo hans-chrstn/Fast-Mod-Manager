@@ -11,7 +11,7 @@ public:
   InventoryService() = default;
   virtual ~InventoryService() = default;
 
-  [[nodiscard]] virtual auto getInventory() const -> std::vector<domain::ModIdentity> = 0;
+  [[nodiscard]] virtual auto getInventory() const -> std::vector<fmm::domain::ModIdentity> = 0;
 };
 
 } // namespace application

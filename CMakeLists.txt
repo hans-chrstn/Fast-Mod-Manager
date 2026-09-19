@@ -66,6 +66,7 @@ add_library(infrastructure OBJECT
   src/infrastructure/JsonProfilePersistence.cpp
   src/infrastructure/StubScriptEngine.cpp
   src/infrastructure/StubProcessLauncher.cpp
+  src/infrastructure/FixtureFilesystemScanner.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
 target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core)

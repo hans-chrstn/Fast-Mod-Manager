@@ -8,8 +8,9 @@ namespace {
 
 class StubInventoryService : public application::InventoryService {
 public:
-  [[nodiscard]] auto getInventory() const -> std::vector<domain::ModIdentity> override {
-    return {domain::ModIdentity{"Stub Mod 1"}, domain::ModIdentity{"Stub Mod 2"}};
+  [[nodiscard]] auto getInventory() const -> std::vector<fmm::domain::ModIdentity> override {
+    return {fmm::domain::ModIdentity::create("Stub Mod 1", "/tmp/m1").value(),
+            fmm::domain::ModIdentity::create("Stub Mod 2", "/tmp/m2").value()};
   }
 };
 

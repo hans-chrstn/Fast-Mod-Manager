@@ -15,6 +15,13 @@ if (( $# > 0 )); then
 fi
 
 cd "$PROJECT_SOURCE_ROOT"
+
+if rg --pcre2 '^\s*//(?!\s*(namespace|unnamed namespace)\b)' src tests >/dev/null 2>&1; then
+  echo "Error: Non-namespace comments found in source files. Please remove them."
+  rg --pcre2 '^\s*//(?!\s*(namespace|unnamed namespace)\b)' src tests || true
+  exit 1
+fi
+
 shellcheck -x -S warning "$PROJECT_SCRIPTS_DIR"/*.sh
 run_script format.sh --check
 run_script configure.sh "$preset"

@@ -8,7 +8,6 @@ auto StubScriptEngine::evaluate(const std::string& script) const
     return std::unexpected("Empty script provided.");
   }
 
-  // Fake execution simply echoes back a prefix
   return "Executed: " + script;
 }
 
