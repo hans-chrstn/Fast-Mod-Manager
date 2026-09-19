@@ -1,19 +1,15 @@
 #include "ui/MainWindow.hpp"
 
 #include "ui/InventoryModel.hpp"
+#include "ui/InventoryWidget.hpp"
+#include "ui/ProgressOverlayWidget.hpp"
 
 #include <QAction>
 #include <QApplication>
-#include <QHBoxLayout>
 #include <QKeySequence>
-#include <QLabel>
-#include <QLineEdit>
-#include <QListView>
 #include <QMenu>
 #include <QMenuBar>
-#include <QProgressBar>
-#include <QPushButton>
-#include <QSortFilterProxyModel>
+#include <QMessageBox>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -44,66 +40,40 @@ void MainWindow::setupUi() {
   auto* central_widget = new QWidget(this);
   auto* layout = new QVBoxLayout(central_widget);
 
-  m_search_bar = new QLineEdit(central_widget);
-  m_search_bar->setPlaceholderText(QStringLiteral("Filter mods..."));
-  layout->addWidget(m_search_bar);
+  m_inventory_widget = new InventoryWidget(m_inventory_model, central_widget);
+  layout->addWidget(m_inventory_widget);
 
-  m_proxy_model = new QSortFilterProxyModel(this);
-  m_proxy_model->setSourceModel(m_inventory_model);
-  m_proxy_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
-
-  connect(m_search_bar, &QLineEdit::textChanged, m_proxy_model,
-          &QSortFilterProxyModel::setFilterFixedString);
-
-  m_list_view = new QListView(central_widget);
-  m_list_view->setModel(m_proxy_model);
-  layout->addWidget(m_list_view);
-
-  m_progress_widget = new QWidget(central_widget);
-  auto* progress_layout = new QHBoxLayout(m_progress_widget);
-  progress_layout->setContentsMargins(0, 0, 0, 0);
-
-  m_status_label = new QLabel(QStringLiteral("Ready"), m_progress_widget);
-  progress_layout->addWidget(m_status_label);
-
-  m_progress_bar = new QProgressBar(m_progress_widget);
-  constexpr int max_progress = 100;
-  m_progress_bar->setRange(0, max_progress);
-  m_progress_bar->setValue(0);
-  progress_layout->addWidget(m_progress_bar);
-
-  m_cancel_button = new QPushButton(QStringLiteral("Cancel"), m_progress_widget);
-  connect(m_cancel_button, &QPushButton::clicked, this, &MainWindow::onCancelClicked);
-  progress_layout->addWidget(m_cancel_button);
-
-  layout->addWidget(m_progress_widget);
-  m_progress_widget->hide();
+  m_progress_overlay = new ProgressOverlayWidget(central_widget);
+  connect(m_progress_overlay, &ProgressOverlayWidget::cancelRequested, this,
+          &MainWindow::onCancelClicked);
+  layout->addWidget(m_progress_overlay);
+  m_progress_overlay->hideOverlay();
 
   setCentralWidget(central_widget);
 }
 
 void MainWindow::onScanProgress(int percentage, const QString& message) {
-  if (m_progress_widget->isHidden()) {
-    m_progress_widget->show();
+  if (m_progress_overlay->isHidden()) {
+    m_progress_overlay->showOverlay();
   }
-  m_progress_bar->setValue(percentage);
-  m_status_label->setText(message);
+  m_progress_overlay->setProgress(percentage, message);
 }
 
 void MainWindow::onScanCompleted() {
-  m_progress_widget->hide();
-  m_status_label->setText(QStringLiteral("Ready"));
+  m_progress_overlay->hideOverlay();
+  m_progress_overlay->resetState();
 }
 
 void MainWindow::onScanFailed(const QString& error) {
-  m_progress_widget->hide();
-  m_status_label->setText(QStringLiteral("Error: ") + error);
+  m_progress_overlay->hideOverlay();
+  m_progress_overlay->resetState();
+  QMessageBox::critical(this, QStringLiteral("Scan Failed"), error);
 }
 
 void MainWindow::onCancelClicked() {
   m_inventory_model->cancelReload();
-  m_progress_widget->hide();
-  m_status_label->setText(QStringLiteral("Cancelled"));
+  m_progress_overlay->hideOverlay();
+  m_progress_overlay->resetState();
 }
 
 } // namespace ui

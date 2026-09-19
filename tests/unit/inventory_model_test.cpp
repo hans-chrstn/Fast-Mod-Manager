@@ -6,6 +6,7 @@
 #include <QString>
 #include <catch2/catch_test_macros.hpp>
 #include <chrono>
+#include <expected>
 #include <functional>
 #include <stop_token>
 #include <string>
@@ -18,9 +19,10 @@ public:
   [[nodiscard]] auto
   getInventory(const std::stop_token& /*stoken*/ = {},
                const std::function<void(int, const std::string&)>& /*progress_callback*/ = {}) const
-      -> std::vector<fmm::domain::ModIdentity> override {
-    return {fmm::domain::ModIdentity::create("Stub Mod 1", "/tmp/m1").value(),
-            fmm::domain::ModIdentity::create("Stub Mod 2", "/tmp/m2").value()};
+      -> std::expected<std::vector<fmm::domain::ModIdentity>, std::string> override {
+    return std::vector<fmm::domain::ModIdentity>{
+        fmm::domain::ModIdentity::create("Stub Mod 1", "/tmp/m1").value(),
+        fmm::domain::ModIdentity::create("Stub Mod 2", "/tmp/m2").value()};
   }
 };
 

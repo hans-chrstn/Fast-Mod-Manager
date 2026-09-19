@@ -29,6 +29,7 @@
           pkgs.qt6.qtsvg
           pkgs.bubblewrap
           pkgs.just
+          pkgs.valgrind
           llvm.clang
           pkgs.clang-tools
         ];
@@ -79,6 +80,7 @@
             pkgs.qt6.qtsvg
             pkgs.bubblewrap
             pkgs.just
+            pkgs.valgrind
             pkgs.ripgrep
             pkgs.shellcheck
           ];

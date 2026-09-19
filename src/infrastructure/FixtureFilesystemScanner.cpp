@@ -13,9 +13,7 @@ auto count_directories(const std::filesystem::path& stagingDirectory, const std:
     -> std::expected<int, core::ScanError> {
   std::error_code error_code;
   int total = 0;
-  for (const auto& entry : std::filesystem::directory_iterator(
-           stagingDirectory, std::filesystem::directory_options::skip_permission_denied,
-           error_code)) {
+  for (const auto& entry : std::filesystem::directory_iterator(stagingDirectory, error_code)) {
     if (stoken.stop_requested()) {
       return std::unexpected(core::ScanError::Unknown);
     }
@@ -82,9 +80,7 @@ auto FixtureFilesystemScanner::scanDirectory(
   int processed = 0;
   std::error_code error_code;
 
-  for (const auto& entry : std::filesystem::directory_iterator(
-           stagingDirectory, std::filesystem::directory_options::skip_permission_denied,
-           error_code)) {
+  for (const auto& entry : std::filesystem::directory_iterator(stagingDirectory, error_code)) {
     if (stoken.stop_requested()) {
       return std::unexpected(core::ScanError::Unknown);
     }

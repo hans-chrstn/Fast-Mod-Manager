@@ -48,10 +48,11 @@ void InventoryModel::reload() {
   cancelReload();
 
   QPointer<InventoryModel> safe_this(this);
-  m_load_task = std::make_unique<AsyncTask<std::vector<fmm::domain::ModIdentity>>>(
+  m_load_task = std::make_unique<
+      AsyncTask<std::expected<std::vector<fmm::domain::ModIdentity>, std::string>>>(
       this,
-      [svc = m_inventory_service,
-       safe_this](const std::stop_token& stoken) -> std::vector<fmm::domain::ModIdentity> {
+      [svc = m_inventory_service, safe_this](const std::stop_token& stoken)
+          -> std::expected<std::vector<fmm::domain::ModIdentity>, std::string> {
         return svc->getInventory(
             stoken, [safe_this](int percentage, const std::string& message) -> void {
               if (safe_this) {
@@ -66,9 +67,15 @@ void InventoryModel::reload() {
               }
             });
       },
-      [this](const std::vector<fmm::domain::ModIdentity>& mods) -> void {
+      [this](
+          const std::expected<std::vector<fmm::domain::ModIdentity>, std::string>& result) -> void {
+        if (!result.has_value()) {
+          m_load_task.reset();
+          emit scanFailed(QString::fromStdString(result.error()));
+          return;
+        }
         beginResetModel();
-        m_mods = mods;
+        m_mods = result.value();
         endResetModel();
         m_load_task.reset();
         emit scanCompleted();

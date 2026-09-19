@@ -3,6 +3,7 @@
 #include "application/InventoryService.hpp"
 #include "core/IModScanner.hpp"
 
+#include <expected>
 #include <filesystem>
 #include <memory>
 
@@ -16,25 +17,38 @@ public:
   [[nodiscard]] auto
   getInventory(const std::stop_token& stoken = {},
                const std::function<void(int, const std::string&)>& progress_callback = {}) const
-      -> std::vector<fmm::domain::ModIdentity> override {
+      -> std::expected<std::vector<fmm::domain::ModIdentity>, std::string> override {
     auto fixture_path = std::filesystem::temp_directory_path() / "fmm_fixture_mods";
-    std::filesystem::create_directories(fixture_path);
+    std::error_code error_code;
+    std::filesystem::create_directories(fixture_path, error_code);
+    if (error_code) {
+      return std::unexpected("Failed to create fixture directory: " + error_code.message());
+    }
 
-    std::filesystem::create_directories(fixture_path / "Unofficial Patch");
-    std::filesystem::create_directories(fixture_path / "High Res Textures");
-    std::filesystem::create_directories(fixture_path / "UI Overhaul");
-    std::filesystem::create_directories(fixture_path / "Alternate Start");
+    std::filesystem::create_directories(fixture_path / "Unofficial Patch", error_code);
+    std::filesystem::create_directories(fixture_path / "High Res Textures", error_code);
+    std::filesystem::create_directories(fixture_path / "UI Overhaul", error_code);
+    std::filesystem::create_directories(fixture_path / "Alternate Start", error_code);
 
     constexpr int dummy_mod_count = 100;
     for (int i = 0; i < dummy_mod_count; ++i) {
-      std::filesystem::create_directories(fixture_path / ("Dummy Mod " + std::to_string(i)));
+      std::filesystem::create_directories(fixture_path / ("Dummy Mod " + std::to_string(i)),
+                                          error_code);
     }
 
     auto result = m_scanner->scanDirectory(fixture_path, stoken, progress_callback);
-    if (result.has_value()) {
-      return result.value();
+    if (!result.has_value()) {
+      switch (result.error()) {
+      case fmm::core::ScanError::DirectoryNotFound:
+        return std::unexpected("Directory not found: " + fixture_path.string());
+      case fmm::core::ScanError::PermissionDenied:
+        return std::unexpected("Permission denied when accessing: " + fixture_path.string());
+      case fmm::core::ScanError::Unknown:
+      default:
+        return std::unexpected("An unknown error occurred during scanning.");
+      }
     }
-    return {};
+    return result.value();
   }
 
 private:

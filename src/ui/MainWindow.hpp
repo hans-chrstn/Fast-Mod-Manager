@@ -2,15 +2,9 @@
 
 #include <QMainWindow>
 
-class QListView;
-class QLineEdit;
-class QSortFilterProxyModel;
-class QProgressBar;
-class QLabel;
-class QPushButton;
-
 namespace ui {
-
+class InventoryWidget;
+class ProgressOverlayWidget;
 class InventoryModel;
 
 class MainWindow : public QMainWindow {
@@ -24,13 +18,8 @@ private:
   void setupUi();
 
   InventoryModel* m_inventory_model;
-  QSortFilterProxyModel* m_proxy_model{nullptr};
-  QLineEdit* m_search_bar{nullptr};
-  QListView* m_list_view{nullptr};
-  QProgressBar* m_progress_bar{nullptr};
-  QLabel* m_status_label{nullptr};
-  QPushButton* m_cancel_button{nullptr};
-  QWidget* m_progress_widget{nullptr};
+  InventoryWidget* m_inventory_widget{nullptr};
+  ProgressOverlayWidget* m_progress_overlay{nullptr};
 
   Q_SLOT void onScanProgress(int percentage, const QString& message);
   Q_SLOT void onScanCompleted();

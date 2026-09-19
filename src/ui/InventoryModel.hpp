@@ -4,7 +4,9 @@
 
 #include <QAbstractListModel>
 #include <QObject>
+#include <expected>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace application {
@@ -33,7 +35,8 @@ public:
 private:
   std::shared_ptr<application::InventoryService> m_inventory_service;
   std::vector<fmm::domain::ModIdentity> m_mods;
-  std::unique_ptr<AsyncTask<std::vector<fmm::domain::ModIdentity>>> m_load_task;
+  std::unique_ptr<AsyncTask<std::expected<std::vector<fmm::domain::ModIdentity>, std::string>>>
+      m_load_task;
 
 Q_SIGNALS:
   void scanProgress(int percentage, const QString& message);

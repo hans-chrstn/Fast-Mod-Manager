@@ -83,6 +83,8 @@ endif()
 
 add_library(ui OBJECT
   src/ui/InventoryModel.cpp
+  src/ui/InventoryWidget.cpp
+  src/ui/ProgressOverlayWidget.cpp
   src/ui/MainWindow.cpp
 )
 target_include_directories(ui PUBLIC src)
