@@ -12,6 +12,8 @@ add_executable(mod-manager-tests
   unit/async_task_test.cpp
   unit/game_manager_test.cpp
   unit/libarchive_package_detector_test.cpp
+  unit/libarchive_reader_test.cpp
+  unit/path_normalizer_test.cpp
 )
 
 target_link_libraries(mod-manager-tests
@@ -34,6 +36,14 @@ add_executable(detector-test-app
 )
 
 target_link_libraries(detector-test-app
+    domain core infrastructure
+)
+
+add_executable(reader-test-app
+    reader_test_app.cpp
+)
+
+target_link_libraries(reader-test-app
     domain core infrastructure
 )
 

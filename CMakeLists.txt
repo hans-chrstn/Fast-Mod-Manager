@@ -33,6 +33,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 add_library(core OBJECT
+  src/core/PathNormalizer.cpp
 )
 target_include_directories(core PUBLIC src)
 target_link_libraries(core PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
@@ -72,6 +73,7 @@ add_library(infrastructure OBJECT
   src/infrastructure/GameManagerImpl.cpp
   src/infrastructure/DependencyValidatorImpl.cpp
   src/infrastructure/LibArchivePackageDetector.cpp
+  src/infrastructure/LibArchiveReader.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
 target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core LibArchive::LibArchive)
