@@ -14,6 +14,10 @@ fi
 export PROJECT_SOURCE_ROOT
 export PROJECT_SCRIPTS_DIR="$PROJECT_SCRIPT_ROOT"
 
+if [[ -f "$PROJECT_SOURCE_ROOT/lsan.supp" ]]; then
+  export LSAN_OPTIONS="suppressions=$PROJECT_SOURCE_ROOT/lsan.supp"
+fi
+
 die() {
   printf '%s\n' "$*" >&2
   exit 1

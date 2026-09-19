@@ -1,0 +1,7 @@
+leak:libfontconfig
+leak:libexpat
+leak:libxkbcommon
+leak:libQt6WaylandClient
+leak:libQt6Gui
+leak:libQt6Core
+leak:libqwayland
