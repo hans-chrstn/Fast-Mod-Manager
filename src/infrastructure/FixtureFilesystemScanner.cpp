@@ -1,35 +1,115 @@
 #include "FixtureFilesystemScanner.hpp"
 
+#include <chrono>
+#include <future>
 #include <system_error>
+#include <thread>
 
 namespace fmm::infrastructure {
 
-auto FixtureFilesystemScanner::scanDirectory(const std::filesystem::path& stagingDirectory) const
-    -> std::expected<std::vector<domain::ModIdentity>, core::ScanError> {
-  if (!std::filesystem::exists(stagingDirectory)) {
-    return std::unexpected(core::ScanError::DirectoryNotFound);
+namespace {
+
+auto count_directories(const std::filesystem::path& stagingDirectory, const std::stop_token& stoken)
+    -> std::expected<int, core::ScanError> {
+  std::error_code error_code;
+  int total = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(
+           stagingDirectory, std::filesystem::directory_options::skip_permission_denied,
+           error_code)) {
+    if (stoken.stop_requested()) {
+      return std::unexpected(core::ScanError::Unknown);
+    }
+    if (entry.is_directory(error_code)) {
+      total++;
+    }
   }
-  if (!std::filesystem::is_directory(stagingDirectory)) {
+  return total;
+}
+
+auto simulate_interruptible_delay(const std::stop_token& stoken, int delay_ms) -> bool {
+  std::promise<void> promise;
+  auto future = promise.get_future();
+  std::stop_callback stop_cb(stoken, [&promise]() -> void { promise.set_value(); });
+
+  return future.wait_for(std::chrono::milliseconds(delay_ms)) == std::future_status::ready;
+}
+
+auto process_entry(const std::filesystem::directory_entry& entry, int processed,
+                   int total_directories, const std::stop_token& stoken,
+                   const std::function<void(int, const std::string&)>& progress_callback)
+    -> std::expected<std::optional<domain::ModIdentity>, core::ScanError> {
+  auto name = entry.path().filename().string();
+  if (progress_callback) {
+    constexpr int max_percentage = 100;
+    int percentage = total_directories > 0 ? (processed * max_percentage) / total_directories : 0;
+    progress_callback(percentage, "Scanning " + name);
+  }
+
+  constexpr int simulation_delay_ms = 50;
+  if (simulate_interruptible_delay(stoken, simulation_delay_ms)) {
+    return std::unexpected(core::ScanError::Unknown);
+  }
+
+  auto mod_identity = domain::ModIdentity::create(name, entry.path());
+  if (mod_identity.has_value()) {
+    return mod_identity.value();
+  }
+  return std::nullopt;
+}
+
+} // namespace
+
+auto FixtureFilesystemScanner::scanDirectory(
+    const std::filesystem::path& stagingDirectory, const std::stop_token& stoken,
+    const std::function<void(int, const std::string&)>& progress_callback) const
+    -> std::expected<std::vector<domain::ModIdentity>, core::ScanError> {
+  if (!std::filesystem::exists(stagingDirectory) ||
+      !std::filesystem::is_directory(stagingDirectory)) {
     return std::unexpected(core::ScanError::DirectoryNotFound);
   }
 
+  if (progress_callback) {
+    progress_callback(0, "Counting directories...");
+  }
+
+  auto count_result = count_directories(stagingDirectory, stoken);
+  if (!count_result.has_value()) {
+    return std::unexpected(count_result.error());
+  }
+  int total_directories = count_result.value();
+
   std::vector<domain::ModIdentity> mods;
+  int processed = 0;
   std::error_code error_code;
 
   for (const auto& entry : std::filesystem::directory_iterator(
            stagingDirectory, std::filesystem::directory_options::skip_permission_denied,
            error_code)) {
+    if (stoken.stop_requested()) {
+      return std::unexpected(core::ScanError::Unknown);
+    }
     if (error_code) {
       return std::unexpected(core::ScanError::PermissionDenied);
     }
 
-    if (entry.is_directory(error_code)) {
-      auto name = entry.path().filename().string();
-      auto mod_identity = domain::ModIdentity::create(name, entry.path());
-      if (mod_identity.has_value()) {
-        mods.push_back(std::move(mod_identity.value()));
-      }
+    if (!entry.is_directory(error_code)) {
+      continue;
     }
+
+    auto process_result =
+        process_entry(entry, processed, total_directories, stoken, progress_callback);
+    if (!process_result.has_value()) {
+      return std::unexpected(process_result.error());
+    }
+    if (process_result.value().has_value()) {
+      mods.push_back(std::move(process_result.value().value()));
+    }
+    processed++;
+  }
+
+  if (progress_callback) {
+    constexpr int final_percentage = 100;
+    progress_callback(final_percentage, "Scan complete");
   }
 
   if (error_code) {

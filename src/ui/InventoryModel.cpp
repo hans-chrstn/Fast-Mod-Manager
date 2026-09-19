@@ -1,7 +1,9 @@
 #include "ui/InventoryModel.hpp"
 
 #include "application/InventoryService.hpp"
+#include "ui/AsyncTask.hpp"
 
+#include <QPointer>
 #include <stdexcept>
 
 namespace ui {
@@ -12,10 +14,9 @@ InventoryModel::InventoryModel(std::shared_ptr<application::InventoryService> in
   if (!m_inventory_service) {
     throw std::invalid_argument("InventoryService cannot be null");
   }
-  reload();
 }
 
-InventoryModel::~InventoryModel() = default;
+InventoryModel::~InventoryModel() { cancelReload(); }
 
 auto InventoryModel::rowCount(const QModelIndex& parent) const -> int {
   if (parent.isValid()) {
@@ -36,10 +37,46 @@ auto InventoryModel::data(const QModelIndex& index, int role) const -> QVariant 
   return {};
 }
 
+void InventoryModel::cancelReload() {
+  if (m_load_task) {
+    m_load_task->cancel();
+    m_load_task.reset();
+  }
+}
+
 void InventoryModel::reload() {
-  beginResetModel();
-  m_mods = m_inventory_service->getInventory();
-  endResetModel();
+  cancelReload();
+
+  QPointer<InventoryModel> safe_this(this);
+  m_load_task = std::make_unique<AsyncTask<std::vector<fmm::domain::ModIdentity>>>(
+      this,
+      [svc = m_inventory_service,
+       safe_this](const std::stop_token& stoken) -> std::vector<fmm::domain::ModIdentity> {
+        return svc->getInventory(
+            stoken, [safe_this](int percentage, const std::string& message) -> void {
+              if (safe_this) {
+                QMetaObject::invokeMethod(
+                    safe_this,
+                    [safe_this, percentage, msg = QString::fromStdString(message)]() -> void {
+                      if (safe_this) {
+                        emit safe_this->scanProgress(percentage, msg);
+                      }
+                    },
+                    Qt::QueuedConnection);
+              }
+            });
+      },
+      [this](const std::vector<fmm::domain::ModIdentity>& mods) -> void {
+        beginResetModel();
+        m_mods = mods;
+        endResetModel();
+        m_load_task.reset();
+        emit scanCompleted();
+      },
+      [this](const std::string& err) -> void {
+        m_load_task.reset();
+        emit scanFailed(QString::fromStdString(err));
+      });
 }
 
 } // namespace ui

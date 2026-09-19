@@ -1,28 +1,63 @@
 #include "application/InventoryService.hpp"
 #include "ui/InventoryModel.hpp"
 
+#include <QCoreApplication>
+#include <QElapsedTimer>
 #include <QString>
 #include <catch2/catch_test_macros.hpp>
+#include <chrono>
+#include <functional>
+#include <stop_token>
+#include <string>
+#include <thread>
 
 namespace {
 
 class StubInventoryService : public application::InventoryService {
 public:
-  [[nodiscard]] auto getInventory() const -> std::vector<fmm::domain::ModIdentity> override {
+  [[nodiscard]] auto
+  getInventory(const std::stop_token& /*stoken*/ = {},
+               const std::function<void(int, const std::string&)>& /*progress_callback*/ = {}) const
+      -> std::vector<fmm::domain::ModIdentity> override {
     return {fmm::domain::ModIdentity::create("Stub Mod 1", "/tmp/m1").value(),
             fmm::domain::ModIdentity::create("Stub Mod 2", "/tmp/m2").value()};
   }
 };
 
+void process_events_until(const std::function<bool()>& condition, int timeout_ms = 1000) {
+  QElapsedTimer timer;
+  timer.start();
+  while (!condition() && timer.elapsed() < timeout_ms) {
+    QCoreApplication::processEvents();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+}
+
 } // namespace
 
 TEST_CASE("InventoryModel populates from InventoryService", "[ui][inventory]") {
+  int argc = 1;
+  char* argv[] = {const_cast<char*>("test")};
+  QCoreApplication app(argc, argv);
+
   auto service = std::make_shared<StubInventoryService>();
   ui::InventoryModel model(service);
 
-  SECTION("row count matches service output") { REQUIRE(model.rowCount() == 2); }
+  SECTION("row count matches service output") {
+    bool loaded = false;
+    QObject::connect(&model, &ui::InventoryModel::scanCompleted, [&]() { loaded = true; });
+    model.reload();
+    process_events_until([&]() { return loaded; });
+
+    REQUIRE(model.rowCount() == 2);
+  }
 
   SECTION("data returns correctly mapped mod names") {
+    bool loaded = false;
+    QObject::connect(&model, &ui::InventoryModel::scanCompleted, [&]() { loaded = true; });
+    model.reload();
+    process_events_until([&]() { return loaded; });
+
     auto index_0 = model.index(0);
     auto index_1 = model.index(1);
 

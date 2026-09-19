@@ -26,4 +26,4 @@ if (( ${#source_files[@]} == 0 )); then
 fi
 
 printf "%s\n" "${source_files[@]}" | xargs -I{} -P "$(nproc)" clang-tidy --quiet -p "build/$preset" "$PROJECT_SOURCE_ROOT/{}" 2>/dev/null
-cppcheck --project="$compile_commands" -i "$PROJECT_SOURCE_ROOT/build" --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem
+cppcheck --project="$compile_commands" -i "$PROJECT_SOURCE_ROOT/build" -Dslots= -Dsignals= -DQ_SLOTS= -DQ_SIGNALS= -DQ_OBJECT= --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem

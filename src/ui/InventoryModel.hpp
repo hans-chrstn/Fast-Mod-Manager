@@ -13,6 +13,8 @@ class InventoryService;
 
 namespace ui {
 
+template <typename T> class AsyncTask;
+
 class InventoryModel : public QAbstractListModel {
   Q_OBJECT
 
@@ -26,10 +28,17 @@ public:
       -> QVariant override;
 
   void reload();
+  void cancelReload();
 
 private:
   std::shared_ptr<application::InventoryService> m_inventory_service;
   std::vector<fmm::domain::ModIdentity> m_mods;
+  std::unique_ptr<AsyncTask<std::vector<fmm::domain::ModIdentity>>> m_load_task;
+
+Q_SIGNALS:
+  void scanProgress(int percentage, const QString& message);
+  void scanCompleted();
+  void scanFailed(const QString& error);
 };
 
 } // namespace ui

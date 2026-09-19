@@ -12,7 +12,9 @@ public:
   FixtureFilesystemScanner() = default;
   ~FixtureFilesystemScanner() override = default;
 
-  [[nodiscard]] auto scanDirectory(const std::filesystem::path& stagingDirectory) const
+  [[nodiscard]] auto
+  scanDirectory(const std::filesystem::path& stagingDirectory, const std::stop_token& stoken = {},
+                const std::function<void(int, const std::string&)>& progress_callback = {}) const
       -> std::expected<std::vector<domain::ModIdentity>, core::ScanError> override;
 };
 
