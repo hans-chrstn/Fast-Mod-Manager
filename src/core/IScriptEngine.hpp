@@ -3,7 +3,7 @@
 #include <expected>
 #include <string>
 
-namespace core {
+namespace fmm::core {
 
 class IScriptEngine {
 public:
@@ -13,4 +13,4 @@ public:
       -> std::expected<std::string, std::string> = 0;
 };
 
-} // namespace core
+} // namespace fmm::core

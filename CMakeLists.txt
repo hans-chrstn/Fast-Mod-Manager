@@ -67,6 +67,8 @@ add_library(infrastructure OBJECT
   src/infrastructure/StubScriptEngine.cpp
   src/infrastructure/StubProcessLauncher.cpp
   src/infrastructure/FixtureFilesystemScanner.cpp
+  src/infrastructure/LuaGameAdapter.cpp
+  src/infrastructure/GameManagerImpl.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
 target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core)

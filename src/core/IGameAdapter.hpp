@@ -1,25 +1,18 @@
 #pragma once
 
-#include <QString>
-#include <string>
+#include "domain/GameCapabilities.hpp"
+#include "domain/GameIdentity.hpp"
+
 #include <vector>
 
-namespace core {
-
-struct ExternalTool {
-  std::string id;
-  std::string name;
-  std::string default_executable_path;
-};
+namespace fmm::core {
 
 class IGameAdapter {
 public:
   virtual ~IGameAdapter() = default;
 
-  [[nodiscard]] virtual auto gameId() const -> std::string = 0;
-  [[nodiscard]] virtual auto gameName() const -> QString = 0;
-  [[nodiscard]] virtual auto defaultDataPath() const -> std::string = 0;
-  [[nodiscard]] virtual auto knownTools() const -> std::vector<ExternalTool> = 0;
+  [[nodiscard]] virtual auto getIdentity() const -> domain::GameIdentity = 0;
+  [[nodiscard]] virtual auto getCapabilities() const -> domain::GameCapabilities = 0;
 };
 
-} // namespace core
+} // namespace fmm::core

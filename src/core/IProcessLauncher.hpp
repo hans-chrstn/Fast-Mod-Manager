@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace core {
+namespace fmm::core {
 
 enum class ProcessLauncherError : std::uint8_t {
   ExecutableNotFound,
@@ -23,4 +23,4 @@ public:
       -> std::expected<void, ProcessLauncherError> = 0;
 };
 
-} // namespace core
+} // namespace fmm::core

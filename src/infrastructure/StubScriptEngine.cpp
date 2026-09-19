@@ -1,14 +1,13 @@
 #include "infrastructure/StubScriptEngine.hpp"
 
-namespace infrastructure {
+namespace fmm::infrastructure {
 
 auto StubScriptEngine::evaluate(const std::string& script) const
     -> std::expected<std::string, std::string> {
   if (script.empty()) {
-    return std::unexpected("Empty script provided.");
+    return std::unexpected("Empty script");
   }
-
-  return "Executed: " + script;
+  return "Evaluated: " + script;
 }
 
-} // namespace infrastructure
+} // namespace fmm::infrastructure

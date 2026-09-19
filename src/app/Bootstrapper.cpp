@@ -26,11 +26,11 @@ void Bootstrapper::buildServiceGraph() {
   m_registry.registerService<fmm::core::IModScanner>(
       std::make_shared<fmm::infrastructure::FixtureFilesystemScanner>());
 
-  m_registry.registerService<core::IProcessLauncher>(
-      std::make_shared<infrastructure::StubProcessLauncher>());
+  m_registry.registerService<fmm::core::IProcessLauncher>(
+      std::make_shared<fmm::infrastructure::StubProcessLauncher>());
 
-  m_registry.registerService<core::IScriptEngine>(
-      std::make_shared<infrastructure::StubScriptEngine>());
+  m_registry.registerService<fmm::core::IScriptEngine>(
+      std::make_shared<fmm::infrastructure::StubScriptEngine>());
 
   m_registry.registerService<application::InventoryService>(
       std::make_shared<application::FakeInventoryService>(

@@ -2,7 +2,7 @@
 
 #include "core/IScriptEngine.hpp"
 
-namespace infrastructure {
+namespace fmm::infrastructure {
 
 class StubScriptEngine : public core::IScriptEngine {
 public:
@@ -10,4 +10,4 @@ public:
       -> std::expected<std::string, std::string> override;
 };
 
-} // namespace infrastructure
+} // namespace fmm::infrastructure

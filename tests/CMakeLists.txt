@@ -10,6 +10,7 @@ add_executable(mod-manager-tests
   unit/process_launcher_test.cpp
   unit/fixture_filesystem_scanner_test.cpp
   unit/async_task_test.cpp
+  unit/game_manager_test.cpp
 )
 
 target_link_libraries(mod-manager-tests
