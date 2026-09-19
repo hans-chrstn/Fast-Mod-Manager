@@ -30,6 +30,7 @@
           pkgs.bubblewrap
           pkgs.just
           pkgs.valgrind
+          pkgs.libarchive
           llvm.clang
           pkgs.clang-tools
         ];
@@ -81,6 +82,7 @@
             pkgs.bubblewrap
             pkgs.just
             pkgs.valgrind
+            pkgs.libarchive
             pkgs.ripgrep
             pkgs.shellcheck
           ];

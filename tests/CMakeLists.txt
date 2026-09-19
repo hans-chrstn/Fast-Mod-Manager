@@ -11,6 +11,7 @@ add_executable(mod-manager-tests
   unit/fixture_filesystem_scanner_test.cpp
   unit/async_task_test.cpp
   unit/game_manager_test.cpp
+  unit/libarchive_package_detector_test.cpp
 )
 
 target_link_libraries(mod-manager-tests
@@ -26,6 +27,14 @@ add_executable(async-test-app
 target_link_libraries(async-test-app
     domain core application infrastructure ui
     Qt6::Core Qt6::Gui Qt6::Widgets
+)
+
+add_executable(detector-test-app
+    detector_test_app.cpp
+)
+
+target_link_libraries(detector-test-app
+    domain core infrastructure
 )
 
 include(Catch)

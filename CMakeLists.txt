@@ -13,6 +13,7 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 option(MOD_MANAGER_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
 find_package(Qt6 CONFIG REQUIRED COMPONENTS Core Gui Widgets)
+find_package(LibArchive REQUIRED)
 
 qt_standard_project_setup()
 
@@ -69,9 +70,11 @@ add_library(infrastructure OBJECT
   src/infrastructure/FixtureFilesystemScanner.cpp
   src/infrastructure/LuaGameAdapter.cpp
   src/infrastructure/GameManagerImpl.cpp
+  src/infrastructure/DependencyValidatorImpl.cpp
+  src/infrastructure/LibArchivePackageDetector.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
-target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core)
+target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core LibArchive::LibArchive)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(infrastructure PRIVATE

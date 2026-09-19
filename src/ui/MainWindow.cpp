@@ -37,6 +37,10 @@ void MainWindow::setupUi() {
   quit_action->setShortcut(QKeySequence::Quit);
   connect(quit_action, &QAction::triggered, qApp, &QApplication::quit);
 
+  auto* tools_menu = menuBar()->addMenu(QStringLiteral("&Tools"));
+  auto* verify_action = tools_menu->addAction(QStringLiteral("&Verify System Prerequisites"));
+  connect(verify_action, &QAction::triggered, this, &MainWindow::requestDependencyCheck);
+
   auto* central_widget = new QWidget(this);
   auto* layout = new QVBoxLayout(central_widget);
 

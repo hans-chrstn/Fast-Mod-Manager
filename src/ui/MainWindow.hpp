@@ -14,6 +14,9 @@ public:
   explicit MainWindow(InventoryModel* inventory_model, QWidget* parent = nullptr);
   ~MainWindow() override = default;
 
+Q_SIGNALS:
+  void requestDependencyCheck();
+
 private:
   void setupUi();
 
