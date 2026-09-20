@@ -7,9 +7,9 @@
 #include <filesystem>
 #include <memory>
 
-namespace fmm::application {
+namespace fmm::test_support {
 
-class FakeInventoryService : public InventoryService {
+class FakeInventoryService final : public fmm::application::InventoryService {
 public:
   explicit FakeInventoryService(std::shared_ptr<fmm::core::IModScanner> scanner)
       : m_scanner(std::move(scanner)) {}
@@ -17,12 +17,13 @@ public:
   [[nodiscard]] auto
   getInventory(const std::stop_token& stoken = {},
                const std::function<void(int, const std::string&)>& progress_callback = {}) const
-      -> std::expected<std::vector<fmm::domain::InstalledPackage>, InventoryError> override {
+      -> std::expected<std::vector<fmm::domain::InstalledPackage>,
+                       fmm::application::InventoryError> override {
     auto fixture_path = std::filesystem::temp_directory_path() / "fmm_fixture_mods";
     std::error_code error_code;
     std::filesystem::create_directories(fixture_path, error_code);
     if (error_code) {
-      return std::unexpected(InventoryError::Internal);
+      return std::unexpected(fmm::application::InventoryError::Internal);
     }
 
     std::filesystem::create_directories(fixture_path / "Unofficial Patch", error_code);
@@ -40,14 +41,14 @@ public:
     if (!result.has_value()) {
       switch (result.error()) {
       case fmm::core::ScanError::DirectoryNotFound:
-        return std::unexpected(InventoryError::SourceUnavailable);
+        return std::unexpected(fmm::application::InventoryError::SourceUnavailable);
       case fmm::core::ScanError::PermissionDenied:
-        return std::unexpected(InventoryError::PermissionDenied);
+        return std::unexpected(fmm::application::InventoryError::PermissionDenied);
       case fmm::core::ScanError::Cancelled:
-        return std::unexpected(InventoryError::Cancelled);
+        return std::unexpected(fmm::application::InventoryError::Cancelled);
       case fmm::core::ScanError::Unknown:
       default:
-        return std::unexpected(InventoryError::Internal);
+        return std::unexpected(fmm::application::InventoryError::Internal);
       }
     }
     return result.value();
@@ -57,4 +58,4 @@ private:
   std::shared_ptr<fmm::core::IModScanner> m_scanner;
 };
 
-} // namespace fmm::application
+} // namespace fmm::test_support

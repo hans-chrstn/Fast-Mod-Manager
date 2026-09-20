@@ -1,11 +1,11 @@
-#include "FixtureFilesystemScanner.hpp"
+#include "support/FixtureFilesystemScanner.hpp"
 
 #include <chrono>
 #include <future>
 #include <system_error>
 #include <thread>
 
-namespace fmm::infrastructure {
+namespace fmm::test_support {
 
 namespace {
 
@@ -115,4 +115,4 @@ auto FixtureFilesystemScanner::scanDirectory(
   return mods;
 }
 
-} // namespace fmm::infrastructure
+} // namespace fmm::test_support

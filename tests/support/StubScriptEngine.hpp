@@ -2,7 +2,7 @@
 
 #include "core/IScriptEngine.hpp"
 
-namespace fmm::infrastructure {
+namespace fmm::test_support {
 
 class StubScriptEngine : public core::IScriptEngine {
 public:
@@ -10,4 +10,4 @@ public:
       -> std::expected<domain::GameDefinition, core::GamePluginError> override;
 };
 
-} // namespace fmm::infrastructure
+} // namespace fmm::test_support

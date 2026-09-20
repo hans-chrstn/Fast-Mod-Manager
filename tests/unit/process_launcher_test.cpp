@@ -1,9 +1,9 @@
-#include "infrastructure/StubProcessLauncher.hpp"
+#include "support/StubProcessLauncher.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("StubProcessLauncher execution", "[infrastructure][StubProcessLauncher]") {
-  fmm::infrastructure::StubProcessLauncher launcher;
+TEST_CASE("StubProcessLauncher execution", "[test-support][StubProcessLauncher]") {
+  fmm::test_support::StubProcessLauncher launcher;
 
   SECTION("Successfully launches valid executable") {
     auto result = launcher.launch("/usr/bin/env", {}, "");

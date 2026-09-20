@@ -60,7 +60,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 add_library(application OBJECT
-  src/application/FakeInventoryService.hpp
   src/application/GameCatalogImpl.cpp
   src/application/ActiveGameSelectionImpl.cpp
   src/application/InventoryService.hpp
@@ -80,9 +79,7 @@ endif()
 
 add_library(infrastructure OBJECT
   src/infrastructure/JsonProfilePersistence.cpp
-  src/infrastructure/StubScriptEngine.cpp
-  src/infrastructure/StubProcessLauncher.cpp
-  src/infrastructure/FixtureFilesystemScanner.cpp
+  src/infrastructure/JsonPackageCatalog.cpp
   src/infrastructure/FilesystemGamePluginScanner.cpp
   src/infrastructure/LuaGamePluginLoader.cpp
   src/infrastructure/LibArchivePackageDetector.cpp
@@ -167,4 +164,3 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS mod-manager RUNTIME DESTINATION bin)
-

@@ -1,6 +1,6 @@
-#include "infrastructure/StubScriptEngine.hpp"
+#include "support/StubScriptEngine.hpp"
 
-namespace fmm::infrastructure {
+namespace fmm::test_support {
 
 auto StubScriptEngine::evaluateGamePlugin(const std::string& script_content) const
     -> std::expected<domain::GameDefinition, core::GamePluginError> {
@@ -23,4 +23,4 @@ auto StubScriptEngine::evaluateGamePlugin(const std::string& script_content) con
   return def;
 }
 
-} // namespace fmm::infrastructure
+} // namespace fmm::test_support

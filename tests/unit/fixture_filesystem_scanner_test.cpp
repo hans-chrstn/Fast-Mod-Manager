@@ -1,4 +1,4 @@
-#include "infrastructure/FixtureFilesystemScanner.hpp"
+#include "support/FixtureFilesystemScanner.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 #include <filesystem>
@@ -12,8 +12,8 @@ void create_dummy_file(const std::filesystem::path& p) {
 } // namespace
 
 TEST_CASE("FixtureFilesystemScanner correctly identifies mod directories",
-          "[infrastructure][scanner]") {
-  fmm::infrastructure::FixtureFilesystemScanner scanner;
+          "[test-support][scanner]") {
+  fmm::test_support::FixtureFilesystemScanner scanner;
 
   auto temp_dir = std::filesystem::temp_directory_path() / "fmm_test_staging";
   std::filesystem::create_directories(temp_dir);

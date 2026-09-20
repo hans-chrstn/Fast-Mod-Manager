@@ -2,7 +2,7 @@
 
 #include "core/IProcessLauncher.hpp"
 
-namespace fmm::infrastructure {
+namespace fmm::test_support {
 
 class StubProcessLauncher : public core::IProcessLauncher {
 public:
@@ -12,4 +12,4 @@ public:
       -> std::expected<void, core::ProcessLauncherError> override;
 };
 
-} // namespace fmm::infrastructure
+} // namespace fmm::test_support

@@ -1,6 +1,6 @@
-#include "infrastructure/StubProcessLauncher.hpp"
+#include "support/StubProcessLauncher.hpp"
 
-namespace fmm::infrastructure {
+namespace fmm::test_support {
 
 auto StubProcessLauncher::launch(const std::string& executable_path,
                                  [[maybe_unused]] const std::vector<std::string>& arguments,
@@ -17,4 +17,4 @@ auto StubProcessLauncher::launch(const std::string& executable_path,
   return {};
 }
 
-} // namespace fmm::infrastructure
+} // namespace fmm::test_support

@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <vector>
 
-namespace fmm::infrastructure {
+namespace fmm::test_support {
 
 class FixtureFilesystemScanner final : public core::IModScanner {
 public:
@@ -18,4 +18,4 @@ public:
       -> std::expected<std::vector<domain::InstalledPackage>, core::ScanError> override;
 };
 
-} // namespace fmm::infrastructure
+} // namespace fmm::test_support

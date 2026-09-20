@@ -1,9 +1,9 @@
-#include "infrastructure/StubScriptEngine.hpp"
+#include "support/StubScriptEngine.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("StubScriptEngine evaluates mock scripts", "[infrastructure][StubScriptEngine]") {
-  fmm::infrastructure::StubScriptEngine engine;
+TEST_CASE("StubScriptEngine evaluates mock scripts", "[test-support][StubScriptEngine]") {
+  fmm::test_support::StubScriptEngine engine;
 
   SECTION("Successfully evaluates valid script string") {
     auto result = engine.evaluateGamePlugin("return 42");

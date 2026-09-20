@@ -1,9 +1,31 @@
 find_package(Catch2 3 CONFIG REQUIRED)
 
+add_library(mod-manager-test-support OBJECT
+  support/FakeInventoryService.cpp
+  support/FixtureFilesystemScanner.cpp
+  support/StubProcessLauncher.cpp
+  support/StubScriptEngine.cpp
+)
+
+target_include_directories(mod-manager-test-support PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mod-manager-test-support PUBLIC domain core application)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(mod-manager-test-support PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wsign-conversion
+  )
+endif()
+
 add_executable(mod-manager-tests
   smoke_test.cpp
   unit/profile_identity_test.cpp
   unit/json_profile_persistence_test.cpp
+  unit/json_package_catalog_test.cpp
+  unit/catalog_inventory_service_test.cpp
   unit/inventory_model_test.cpp
   unit/service_registry_test.cpp
   unit/script_engine_test.cpp
@@ -20,7 +42,7 @@ add_executable(mod-manager-tests
 
 target_link_libraries(mod-manager-tests
     PRIVATE
-    domain core application infrastructure ui
+    domain core application infrastructure ui mod-manager-test-support
     Catch2::Catch2WithMain
     Qt6::Core Qt6::Gui Qt6::Widgets
 )
@@ -72,3 +94,11 @@ target_link_libraries(reader-test-app
 
 include(Catch)
 catch_discover_tests(mod-manager-tests)
+
+add_test(
+  NAME production-binary-excludes-test-doubles
+  COMMAND ${CMAKE_COMMAND}
+          "-DNM_TOOL=${CMAKE_NM}"
+          "-DBINARY=$<TARGET_FILE:mod-manager>"
+          -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/verify_production_binary.cmake"
+)
