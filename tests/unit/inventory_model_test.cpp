@@ -19,10 +19,21 @@ public:
   [[nodiscard]] auto
   getInventory(const std::stop_token& /*stoken*/ = {},
                const std::function<void(int, const std::string&)>& /*progress_callback*/ = {}) const
-      -> std::expected<std::vector<fmm::domain::ModIdentity>, std::string> override {
-    return std::vector<fmm::domain::ModIdentity>{
-        fmm::domain::ModIdentity::create("Stub Mod 1", "/tmp/m1").value(),
-        fmm::domain::ModIdentity::create("Stub Mod 2", "/tmp/m2").value()};
+      -> std::expected<std::vector<fmm::domain::InstalledPackage>,
+                       fmm::application::InventoryError> override {
+    return std::vector<fmm::domain::InstalledPackage>{
+        fmm::domain::InstalledPackage(
+            fmm::domain::PackageId("stub_1"),
+            fmm::domain::PackageMetadata{
+                .name = "Stub Mod 1", .version = "1.0", .source = "fixture"},
+            fmm::domain::PackageLocation{.staging_path = "/tmp/m1",
+                                         .object_store_ref = std::nullopt}),
+        fmm::domain::InstalledPackage(
+            fmm::domain::PackageId("stub_2"),
+            fmm::domain::PackageMetadata{
+                .name = "Stub Mod 2", .version = "1.0", .source = "fixture"},
+            fmm::domain::PackageLocation{.staging_path = "/tmp/m2",
+                                         .object_store_ref = std::nullopt})};
   }
 };
 

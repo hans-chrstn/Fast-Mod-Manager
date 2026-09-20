@@ -3,6 +3,7 @@
 #include "core/ServiceRegistry.hpp"
 
 #include <QApplication>
+#include <functional>
 #include <memory>
 
 namespace fmm::application {
@@ -16,15 +17,17 @@ class MainWindow;
 
 namespace fmm::app {
 
+using CompositionCallback = std::function<void(fmm::core::ServiceRegistry&)>;
+
 class Bootstrapper {
 public:
-  Bootstrapper(int& argc, char** argv);
+  Bootstrapper(int& argc, char** argv, const CompositionCallback& composition_hook = nullptr);
   ~Bootstrapper();
 
   auto run() -> int;
 
 private:
-  void buildServiceGraph();
+  void buildServiceGraph(const CompositionCallback& composition_hook);
 
   QApplication m_application;
   fmm::core::ServiceRegistry m_registry;

@@ -14,12 +14,35 @@ add_executable(mod-manager-tests
   unit/libarchive_reader_test.cpp
   unit/path_normalizer_test.cpp
   unit/rust_boundary_test.cpp
+  unit/staging_repository_test.cpp
+  integration/archive_ingestion_test.cpp
 )
 
 target_link_libraries(mod-manager-tests
+    PRIVATE
     domain core application infrastructure ui
     Catch2::Catch2WithMain
     Qt6::Core Qt6::Gui Qt6::Widgets
+)
+
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+set(FIXTURES_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/fixtures/corpus")
+add_custom_command(
+  OUTPUT "${FIXTURES_OUTPUT_DIR}/valid_simple.zip"
+         "${FIXTURES_OUTPUT_DIR}/corrupt_magic.zip"
+         "${FIXTURES_OUTPUT_DIR}/traversal_malicious.zip"
+         "${FIXTURES_OUTPUT_DIR}/oversized_mock.zip"
+         "${FIXTURES_OUTPUT_DIR}/nested_archive.zip"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${FIXTURES_OUTPUT_DIR}"
+  COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/generate_corpus.py" "${FIXTURES_OUTPUT_DIR}"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/generate_corpus.py"
+  COMMENT "Generating test fixture corpus..."
+)
+add_custom_target(generate_fixtures DEPENDS "${FIXTURES_OUTPUT_DIR}/valid_simple.zip")
+add_dependencies(mod-manager-tests generate_fixtures)
+
+target_compile_definitions(mod-manager-tests PRIVATE 
+  FIXTURES_DIR="${FIXTURES_OUTPUT_DIR}"
 )
 
 add_executable(async-test-app

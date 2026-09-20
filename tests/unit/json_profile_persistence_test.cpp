@@ -30,19 +30,19 @@ TEST_CASE("JsonProfilePersistence schema and storage", "[infrastructure][persist
   auto identity = ProfileIdentity::create("TestProfile").value();
 
   SECTION("Loading non-existent file returns FileNotFound") {
-    auto result = persistence.load(identity);
+    auto result = persistence.loadMetadata(identity);
     REQUIRE(!result.has_value());
-    REQUIRE(result.error() == ProfilePersistenceError::FileNotFound);
+    REQUIRE(result.error() == fmm::application::ports::ProfilePersistenceError::FileNotFound);
   }
 
   SECTION("Saving and loading successfully preserves schema") {
     ProfileMetadata meta{.identity = identity,
                          .schema_version = JsonProfilePersistence::CURRENT_SCHEMA_VERSION,
                          .description = "My test description"};
-    auto save_result = persistence.save(meta);
+    auto save_result = persistence.saveMetadata(meta);
     REQUIRE(save_result.has_value());
 
-    auto load_result = persistence.load(identity);
+    auto load_result = persistence.loadMetadata(identity);
     REQUIRE(load_result.has_value());
     REQUIRE(load_result->identity == meta.identity);
     REQUIRE(load_result->schema_version == meta.schema_version);
@@ -55,9 +55,9 @@ TEST_CASE("JsonProfilePersistence schema and storage", "[infrastructure][persist
     out << "{ invalid json ";
     out.close();
 
-    auto result = persistence.load(identity);
+    auto result = persistence.loadMetadata(identity);
     REQUIRE(!result.has_value());
-    REQUIRE(result.error() == ProfilePersistenceError::InvalidFormat);
+    REQUIRE(result.error() == fmm::application::ports::ProfilePersistenceError::InvalidFormat);
   }
 
   SECTION("Loading unsupported schema version returns UnsupportedSchemaVersion") {
@@ -66,9 +66,21 @@ TEST_CASE("JsonProfilePersistence schema and storage", "[infrastructure][persist
     out << R"({ "schema_version": 999, "description": "Future" })";
     out.close();
 
-    auto result = persistence.load(identity);
+    auto result = persistence.loadMetadata(identity);
     REQUIRE(!result.has_value());
-    REQUIRE(result.error() == ProfilePersistenceError::UnsupportedSchemaVersion);
+    REQUIRE(result.error() ==
+            fmm::application::ports::ProfilePersistenceError::UnsupportedSchemaVersion);
+  }
+
+  SECTION("Saving and loading state successfully preserves state") {
+    ProfileState state;
+    state.selected_game_id = "test_game";
+    auto save_result = persistence.saveState(identity, state);
+    REQUIRE(save_result.has_value());
+
+    auto load_result = persistence.loadState(identity);
+    REQUIRE(load_result.has_value());
+    REQUIRE(load_result->selected_game_id == "test_game");
   }
 
   std::filesystem::remove_all(temp_dir);

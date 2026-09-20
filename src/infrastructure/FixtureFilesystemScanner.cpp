@@ -15,7 +15,7 @@ auto count_directories(const std::filesystem::path& stagingDirectory, const std:
   int total = 0;
   for (const auto& entry : std::filesystem::directory_iterator(stagingDirectory, error_code)) {
     if (stoken.stop_requested()) {
-      return std::unexpected(core::ScanError::Unknown);
+      return std::unexpected(core::ScanError::Cancelled);
     }
     if (entry.is_directory(error_code)) {
       total++;
@@ -35,7 +35,7 @@ auto simulate_interruptible_delay(const std::stop_token& stoken, int delay_ms) -
 auto process_entry(const std::filesystem::directory_entry& entry, int processed,
                    int total_directories, const std::stop_token& stoken,
                    const std::function<void(int, const std::string&)>& progress_callback)
-    -> std::expected<std::optional<domain::ModIdentity>, core::ScanError> {
+    -> std::expected<std::optional<domain::InstalledPackage>, core::ScanError> {
   auto name = entry.path().filename().string();
   if (progress_callback) {
     constexpr int max_percentage = 100;
@@ -45,14 +45,14 @@ auto process_entry(const std::filesystem::directory_entry& entry, int processed,
 
   constexpr int simulation_delay_ms = 50;
   if (simulate_interruptible_delay(stoken, simulation_delay_ms)) {
-    return std::unexpected(core::ScanError::Unknown);
+    return std::unexpected(core::ScanError::Cancelled);
   }
 
-  auto mod_identity = domain::ModIdentity::create(name, entry.path());
-  if (mod_identity.has_value()) {
-    return mod_identity.value();
-  }
-  return std::nullopt;
+  domain::PackageId package_id(name);
+  domain::PackageMetadata metadata{.name = name, .version = "1.0", .source = "fixture"};
+  domain::PackageLocation location{.staging_path = entry.path(), .object_store_ref = std::nullopt};
+
+  return domain::InstalledPackage(std::move(package_id), std::move(metadata), std::move(location));
 }
 
 } // namespace
@@ -60,7 +60,7 @@ auto process_entry(const std::filesystem::directory_entry& entry, int processed,
 auto FixtureFilesystemScanner::scanDirectory(
     const std::filesystem::path& stagingDirectory, const std::stop_token& stoken,
     const std::function<void(int, const std::string&)>& progress_callback) const
-    -> std::expected<std::vector<domain::ModIdentity>, core::ScanError> {
+    -> std::expected<std::vector<domain::InstalledPackage>, core::ScanError> {
   if (!std::filesystem::exists(stagingDirectory) ||
       !std::filesystem::is_directory(stagingDirectory)) {
     return std::unexpected(core::ScanError::DirectoryNotFound);
@@ -76,13 +76,13 @@ auto FixtureFilesystemScanner::scanDirectory(
   }
   int total_directories = count_result.value();
 
-  std::vector<domain::ModIdentity> mods;
+  std::vector<domain::InstalledPackage> mods;
   int processed = 0;
   std::error_code error_code;
 
   for (const auto& entry : std::filesystem::directory_iterator(stagingDirectory, error_code)) {
     if (stoken.stop_requested()) {
-      return std::unexpected(core::ScanError::Unknown);
+      return std::unexpected(core::ScanError::Cancelled);
     }
     if (error_code) {
       return std::unexpected(core::ScanError::PermissionDenied);

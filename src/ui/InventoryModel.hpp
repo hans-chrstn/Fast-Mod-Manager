@@ -1,6 +1,7 @@
 #pragma once
 
-#include "domain/ModIdentity.hpp"
+#include "application/InventoryError.hpp"
+#include "domain/InstalledPackage.hpp"
 
 #include <QAbstractListModel>
 #include <QObject>
@@ -34,8 +35,9 @@ public:
 
 private:
   std::shared_ptr<fmm::application::InventoryService> m_inventory_service;
-  std::vector<fmm::domain::ModIdentity> m_mods;
-  std::unique_ptr<AsyncTask<std::expected<std::vector<fmm::domain::ModIdentity>, std::string>>>
+  std::vector<fmm::domain::InstalledPackage> m_mods;
+  std::unique_ptr<AsyncTask<
+      std::expected<std::vector<fmm::domain::InstalledPackage>, fmm::application::InventoryError>>>
       m_load_task;
 
 Q_SIGNALS:

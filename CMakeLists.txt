@@ -89,6 +89,7 @@ add_library(infrastructure OBJECT
   src/infrastructure/DependencyValidatorImpl.cpp
   src/infrastructure/GameFsClient.cpp
   src/infrastructure/LibArchiveReader.cpp
+  src/infrastructure/StagingRepositoryImpl.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
 target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core LibArchive::LibArchive fmm_core)

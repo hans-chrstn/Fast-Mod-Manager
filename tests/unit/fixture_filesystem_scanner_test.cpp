@@ -42,10 +42,10 @@ TEST_CASE("FixtureFilesystemScanner correctly identifies mod directories",
     bool found1 = false;
     bool found2 = false;
     for (const auto& mod : mods) {
-      if (mod.name() == "TestMod1") {
+      if (mod.metadata().name == "TestMod1") {
         found1 = true;
       }
-      if (mod.name() == "TestMod2") {
+      if (mod.metadata().name == "TestMod2") {
         found2 = true;
       }
     }

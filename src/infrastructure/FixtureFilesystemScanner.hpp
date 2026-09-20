@@ -15,7 +15,7 @@ public:
   [[nodiscard]] auto
   scanDirectory(const std::filesystem::path& stagingDirectory, const std::stop_token& stoken = {},
                 const std::function<void(int, const std::string&)>& progress_callback = {}) const
-      -> std::expected<std::vector<domain::ModIdentity>, core::ScanError> override;
+      -> std::expected<std::vector<domain::InstalledPackage>, core::ScanError> override;
 };
 
 } // namespace fmm::infrastructure

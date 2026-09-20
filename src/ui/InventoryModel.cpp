@@ -31,7 +31,7 @@ auto InventoryModel::data(const QModelIndex& index, int role) const -> QVariant 
   }
 
   if (role == Qt::DisplayRole) {
-    return QString::fromStdString(m_mods[static_cast<std::size_t>(index.row())].name());
+    return QString::fromStdString(m_mods[static_cast<std::size_t>(index.row())].metadata().name);
   }
 
   return {};
@@ -48,11 +48,12 @@ void InventoryModel::reload() {
   cancelReload();
 
   QPointer<InventoryModel> safe_this(this);
-  m_load_task = std::make_unique<
-      AsyncTask<std::expected<std::vector<fmm::domain::ModIdentity>, std::string>>>(
+  m_load_task = std::make_unique<AsyncTask<
+      std::expected<std::vector<fmm::domain::InstalledPackage>, fmm::application::InventoryError>>>(
       this,
       [svc = m_inventory_service, safe_this](const std::stop_token& stoken)
-          -> std::expected<std::vector<fmm::domain::ModIdentity>, std::string> {
+          -> std::expected<std::vector<fmm::domain::InstalledPackage>,
+                           fmm::application::InventoryError> {
         return svc->getInventory(
             stoken, [safe_this](int percentage, const std::string& message) -> void {
               if (safe_this) {
@@ -67,11 +68,31 @@ void InventoryModel::reload() {
               }
             });
       },
-      [this](
-          const std::expected<std::vector<fmm::domain::ModIdentity>, std::string>& result) -> void {
+      [this](const std::expected<std::vector<fmm::domain::InstalledPackage>,
+                                 fmm::application::InventoryError>& result) -> void {
         if (!result.has_value()) {
           m_load_task.reset();
-          emit scanFailed(QString::fromStdString(result.error()));
+          if (result.error() == fmm::application::InventoryError::Cancelled) {
+            emit scanCompleted();
+            return;
+          }
+          QString err_msg;
+          switch (result.error()) {
+          case fmm::application::InventoryError::SourceUnavailable:
+            err_msg = QStringLiteral("Source directory is unavailable.");
+            break;
+          case fmm::application::InventoryError::PermissionDenied:
+            err_msg = QStringLiteral("Permission denied while scanning.");
+            break;
+          case fmm::application::InventoryError::CorruptMetadata:
+            err_msg = QStringLiteral("Package metadata is corrupt.");
+            break;
+          case fmm::application::InventoryError::Internal:
+          default:
+            err_msg = QStringLiteral("An internal error occurred.");
+            break;
+          }
+          emit scanFailed(err_msg);
           return;
         }
         beginResetModel();

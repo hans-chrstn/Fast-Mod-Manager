@@ -1,15 +1,8 @@
 #include "app/Bootstrapper.hpp"
 
-#include "application/FakeInventoryService.hpp"
 #include "application/InventoryService.hpp"
 #include "core/IDependencyValidator.hpp"
-#include "core/IModScanner.hpp"
-#include "core/IProcessLauncher.hpp"
-#include "core/IScriptEngine.hpp"
 #include "infrastructure/DependencyValidatorImpl.hpp"
-#include "infrastructure/FixtureFilesystemScanner.hpp"
-#include "infrastructure/StubProcessLauncher.hpp"
-#include "infrastructure/StubScriptEngine.hpp"
 #include "ui/InventoryModel.hpp"
 #include "ui/MainWindow.hpp"
 
@@ -19,29 +12,21 @@
 
 namespace fmm::app {
 
-Bootstrapper::Bootstrapper(int& argc, char** argv) : m_application(argc, argv) {
-  buildServiceGraph();
+Bootstrapper::Bootstrapper(int& argc, char** argv, const CompositionCallback& composition_hook)
+    : m_application(argc, argv) {
+  buildServiceGraph(composition_hook);
   m_main_window->show();
 }
 
 Bootstrapper::~Bootstrapper() = default;
 
-void Bootstrapper::buildServiceGraph() {
+void Bootstrapper::buildServiceGraph(const CompositionCallback& composition_hook) {
   m_registry.registerService<fmm::core::IDependencyValidator>(
       std::make_shared<fmm::infrastructure::DependencyValidatorImpl>());
 
-  m_registry.registerService<fmm::core::IModScanner>(
-      std::make_shared<fmm::infrastructure::FixtureFilesystemScanner>());
-
-  m_registry.registerService<fmm::core::IProcessLauncher>(
-      std::make_shared<fmm::infrastructure::StubProcessLauncher>());
-
-  m_registry.registerService<fmm::core::IScriptEngine>(
-      std::make_shared<fmm::infrastructure::StubScriptEngine>());
-
-  m_registry.registerService<fmm::application::InventoryService>(
-      std::make_shared<fmm::application::FakeInventoryService>(
-          m_registry.resolve<fmm::core::IModScanner>()));
+  if (composition_hook) {
+    composition_hook(m_registry);
+  }
 
   m_inventory_model = std::make_unique<fmm::ui::InventoryModel>(
       m_registry.resolve<fmm::application::InventoryService>(), nullptr);
