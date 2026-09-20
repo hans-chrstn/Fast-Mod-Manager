@@ -6,7 +6,7 @@ class QListView;
 class QLineEdit;
 class QSortFilterProxyModel;
 
-namespace ui {
+namespace fmm::ui {
 
 class InventoryModel;
 
@@ -26,4 +26,4 @@ private:
   QListView* m_list_view{nullptr};
 };
 
-} // namespace ui
+} // namespace fmm::ui

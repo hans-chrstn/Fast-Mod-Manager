@@ -81,6 +81,7 @@ add_library(infrastructure OBJECT
   src/infrastructure/LuaGameAdapter.cpp
   src/infrastructure/GameManagerImpl.cpp
   src/infrastructure/DependencyValidatorImpl.cpp
+  src/infrastructure/GameFsClient.cpp
   src/infrastructure/LibArchivePackageDetector.cpp
   src/infrastructure/LibArchiveReader.cpp
 )

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace application {
+namespace fmm::application {
 
 class InventoryService {
 public:
@@ -21,4 +21,4 @@ public:
       -> std::expected<std::vector<fmm::domain::ModIdentity>, std::string> = 0;
 };
 
-} // namespace application
+} // namespace fmm::application

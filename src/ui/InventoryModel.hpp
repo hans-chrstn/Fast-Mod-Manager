@@ -9,11 +9,11 @@
 #include <string>
 #include <vector>
 
-namespace application {
+namespace fmm::application {
 class InventoryService;
 }
 
-namespace ui {
+namespace fmm::ui {
 
 template <typename T> class AsyncTask;
 
@@ -21,7 +21,7 @@ class InventoryModel : public QAbstractListModel {
   Q_OBJECT
 
 public:
-  explicit InventoryModel(std::shared_ptr<application::InventoryService> inventory_service,
+  explicit InventoryModel(std::shared_ptr<fmm::application::InventoryService> inventory_service,
                           QObject* parent = nullptr);
   ~InventoryModel() override;
 
@@ -33,7 +33,7 @@ public:
   void cancelReload();
 
 private:
-  std::shared_ptr<application::InventoryService> m_inventory_service;
+  std::shared_ptr<fmm::application::InventoryService> m_inventory_service;
   std::vector<fmm::domain::ModIdentity> m_mods;
   std::unique_ptr<AsyncTask<std::expected<std::vector<fmm::domain::ModIdentity>, std::string>>>
       m_load_task;
@@ -44,4 +44,4 @@ Q_SIGNALS:
   void scanFailed(const QString& error);
 };
 
-} // namespace ui
+} // namespace fmm::ui

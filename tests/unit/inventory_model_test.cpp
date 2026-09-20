@@ -14,7 +14,7 @@
 
 namespace {
 
-class StubInventoryService : public application::InventoryService {
+class StubInventoryService : public fmm::application::InventoryService {
 public:
   [[nodiscard]] auto
   getInventory(const std::stop_token& /*stoken*/ = {},
@@ -43,11 +43,11 @@ TEST_CASE("InventoryModel populates from InventoryService", "[ui][inventory]") {
   QCoreApplication app(argc, argv);
 
   auto service = std::make_shared<StubInventoryService>();
-  ui::InventoryModel model(service);
+  fmm::ui::InventoryModel model(service);
 
   SECTION("row count matches service output") {
     bool loaded = false;
-    QObject::connect(&model, &ui::InventoryModel::scanCompleted, [&]() { loaded = true; });
+    QObject::connect(&model, &fmm::ui::InventoryModel::scanCompleted, [&]() { loaded = true; });
     model.reload();
     process_events_until([&]() { return loaded; });
 
@@ -56,7 +56,7 @@ TEST_CASE("InventoryModel populates from InventoryService", "[ui][inventory]") {
 
   SECTION("data returns correctly mapped mod names") {
     bool loaded = false;
-    QObject::connect(&model, &ui::InventoryModel::scanCompleted, [&]() { loaded = true; });
+    QObject::connect(&model, &fmm::ui::InventoryModel::scanCompleted, [&]() { loaded = true; });
     model.reload();
     process_events_until([&]() { return loaded; });
 
@@ -74,6 +74,6 @@ TEST_CASE("InventoryModel populates from InventoryService", "[ui][inventory]") {
   }
 
   SECTION("throws std::invalid_argument if service is null") {
-    REQUIRE_THROWS_AS(ui::InventoryModel(nullptr), std::invalid_argument);
+    REQUIRE_THROWS_AS(fmm::ui::InventoryModel(nullptr), std::invalid_argument);
   }
 }

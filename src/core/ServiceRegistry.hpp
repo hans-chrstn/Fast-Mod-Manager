@@ -5,7 +5,7 @@
 #include <typeindex>
 #include <unordered_map>
 
-namespace core {
+namespace fmm::core {
 
 class ServiceRegistry {
 public:
@@ -39,4 +39,4 @@ private:
   std::unordered_map<std::type_index, std::shared_ptr<void>> m_services;
 };
 
-} // namespace core
+} // namespace fmm::core

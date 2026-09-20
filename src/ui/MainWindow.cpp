@@ -13,7 +13,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-namespace ui {
+namespace fmm::ui {
 
 MainWindow::MainWindow(InventoryModel* inventory_model, QWidget* parent)
     : QMainWindow(parent), m_inventory_model(inventory_model) {
@@ -80,4 +80,4 @@ void MainWindow::onCancelClicked() {
   m_progress_overlay->resetState();
 }
 
-} // namespace ui
+} // namespace fmm::ui

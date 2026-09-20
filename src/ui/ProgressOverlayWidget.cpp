@@ -5,7 +5,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 
-namespace ui {
+namespace fmm::ui {
 
 ProgressOverlayWidget::ProgressOverlayWidget(QWidget* parent) : QWidget(parent) { setupUi(); }
 
@@ -41,4 +41,4 @@ void ProgressOverlayWidget::hideOverlay() { hide(); }
 
 void ProgressOverlayWidget::showOverlay() { show(); }
 
-} // namespace ui
+} // namespace fmm::ui

@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace application {
+namespace fmm::application {
 
 class FakeInventoryService : public InventoryService {
 public:
@@ -55,4 +55,4 @@ private:
   std::shared_ptr<fmm::core::IModScanner> m_scanner;
 };
 
-} // namespace application
+} // namespace fmm::application

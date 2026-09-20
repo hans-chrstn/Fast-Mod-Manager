@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 
-namespace ui {
+namespace fmm::ui {
 class InventoryWidget;
 class ProgressOverlayWidget;
 class InventoryModel;
@@ -30,4 +30,4 @@ private:
   Q_SLOT void onCancelClicked();
 };
 
-} // namespace ui
+} // namespace fmm::ui

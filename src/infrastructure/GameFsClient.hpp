@@ -1,9 +1,24 @@
 #pragma once
 
+#include "core/GameFsPlan.hpp"
+
 extern "C" {
 struct FmmContext;
-FmmContext* fmm_context_create();
+
+struct FmmStringArray {
+  const char* const* data;
+  size_t length;
+};
+
+struct FmmGameFsPlan {
+  const char* profile_id;
+  const char* target_game_directory;
+  FmmStringArray deployed_files;
+};
+
+auto fmm_context_create() -> FmmContext*;
 void fmm_context_destroy(FmmContext* ctx);
+auto fmm_gamefs_apply_plan(FmmContext* ctx, const FmmGameFsPlan* plan) -> int;
 }
 
 namespace fmm::infrastructure {
@@ -20,7 +35,7 @@ public:
 
   GameFsClient(GameFsClient&& other) noexcept : handle_(other.handle_) { other.handle_ = nullptr; }
 
-  GameFsClient& operator=(GameFsClient&& other) noexcept {
+  auto operator=(GameFsClient&& other) noexcept -> GameFsClient& {
     if (this != &other) {
       if (handle_ != nullptr) {
         fmm_context_destroy(handle_);
@@ -32,7 +47,9 @@ public:
   }
 
   GameFsClient(const GameFsClient&) = delete;
-  GameFsClient& operator=(const GameFsClient&) = delete;
+  auto operator=(const GameFsClient&) -> GameFsClient& = delete;
+
+  [[nodiscard]] auto applyPlan(const core::GameFsPlan& plan) const -> bool;
 
 private:
   FmmContext* handle_{};

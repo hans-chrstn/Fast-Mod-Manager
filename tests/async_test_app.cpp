@@ -20,7 +20,7 @@ auto main(int argc, char* argv[]) -> int {
   auto* startButton = new QPushButton("Start Long Task", &window);
   layout->addWidget(startButton);
 
-  std::unique_ptr<ui::AsyncTask<std::string>> activeTask;
+  std::unique_ptr<fmm::ui::AsyncTask<std::string>> activeTask;
 
   QObject::connect(startButton, &QPushButton::clicked, [&]() -> void {
     startButton->setEnabled(false);
@@ -29,7 +29,7 @@ auto main(int argc, char* argv[]) -> int {
     const int iterations = 50;
     const int sleep_ms = 100;
 
-    activeTask = std::make_unique<ui::AsyncTask<std::string>>(
+    activeTask = std::make_unique<fmm::ui::AsyncTask<std::string>>(
         &window,
         [iterations, sleep_ms](const std::stop_token& stoken) -> std::string {
           for (int i = 0; i < iterations; ++i) {

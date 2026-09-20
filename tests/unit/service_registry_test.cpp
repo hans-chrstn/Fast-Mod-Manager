@@ -26,7 +26,7 @@ public:
 } // namespace
 
 TEST_CASE("ServiceRegistry manages service lifecycles", "[core][ServiceRegistry]") {
-  core::ServiceRegistry registry;
+  fmm::core::ServiceRegistry registry;
 
   SECTION("Can register and resolve a service") {
     auto service = std::make_shared<TestServiceImpl>();

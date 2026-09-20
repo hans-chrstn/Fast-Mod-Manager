@@ -17,7 +17,7 @@
 #include <memory>
 #include <numeric>
 
-namespace app {
+namespace fmm::app {
 
 Bootstrapper::Bootstrapper(int& argc, char** argv) : m_application(argc, argv) {
   buildServiceGraph();
@@ -39,13 +39,13 @@ void Bootstrapper::buildServiceGraph() {
   m_registry.registerService<fmm::core::IScriptEngine>(
       std::make_shared<fmm::infrastructure::StubScriptEngine>());
 
-  m_registry.registerService<application::InventoryService>(
-      std::make_shared<application::FakeInventoryService>(
+  m_registry.registerService<fmm::application::InventoryService>(
+      std::make_shared<fmm::application::FakeInventoryService>(
           m_registry.resolve<fmm::core::IModScanner>()));
 
-  m_inventory_model = std::make_unique<ui::InventoryModel>(
-      m_registry.resolve<application::InventoryService>(), nullptr);
-  m_main_window = std::make_unique<ui::MainWindow>(m_inventory_model.get());
+  m_inventory_model = std::make_unique<fmm::ui::InventoryModel>(
+      m_registry.resolve<fmm::application::InventoryService>(), nullptr);
+  m_main_window = std::make_unique<fmm::ui::MainWindow>(m_inventory_model.get());
 }
 
 auto Bootstrapper::run() -> int {
@@ -69,7 +69,7 @@ auto Bootstrapper::run() -> int {
     }
   };
 
-  QObject::connect(m_main_window.get(), &ui::MainWindow::requestDependencyCheck,
+  QObject::connect(m_main_window.get(), &fmm::ui::MainWindow::requestDependencyCheck,
                    check_dependencies);
 
   auto initial_missing = validator->getMissingDependencies();
@@ -81,4 +81,4 @@ auto Bootstrapper::run() -> int {
   return QApplication::exec();
 }
 
-} // namespace app
+} // namespace fmm::app

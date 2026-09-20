@@ -5,16 +5,16 @@
 #include <QApplication>
 #include <memory>
 
-namespace application {
+namespace fmm::application {
 class InventoryService;
 }
 
-namespace ui {
+namespace fmm::ui {
 class InventoryModel;
 class MainWindow;
-} // namespace ui
+} // namespace fmm::ui
 
-namespace app {
+namespace fmm::app {
 
 class Bootstrapper {
 public:
@@ -27,10 +27,10 @@ private:
   void buildServiceGraph();
 
   QApplication m_application;
-  core::ServiceRegistry m_registry;
+  fmm::core::ServiceRegistry m_registry;
 
-  std::unique_ptr<ui::InventoryModel> m_inventory_model;
-  std::unique_ptr<ui::MainWindow> m_main_window;
+  std::unique_ptr<fmm::ui::InventoryModel> m_inventory_model;
+  std::unique_ptr<fmm::ui::MainWindow> m_main_window;
 };
 
-} // namespace app
+} // namespace fmm::app

@@ -7,7 +7,7 @@
 #include <QtPlugin>
 #include <string>
 
-namespace core {
+namespace fmm::core {
 
 class IPlugin {
 public:
@@ -21,6 +21,6 @@ public:
   virtual void contributeLaunchPlan(LaunchPlan& plan) = 0;
 };
 
-} // namespace core
+} // namespace fmm::core
 
-Q_DECLARE_INTERFACE(core::IPlugin, "com.fastmodmanager.IPlugin/1.0")
+Q_DECLARE_INTERFACE(fmm::core::IPlugin, "com.fastmodmanager.IPlugin/1.0")

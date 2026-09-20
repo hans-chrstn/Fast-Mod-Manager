@@ -34,7 +34,7 @@ TEST_CASE("AsyncTask executes work and returns result to UI thread", "[ui][async
     bool success_called = false;
     std::string result_val;
 
-    ui::AsyncTask<std::string> task(
+    fmm::ui::AsyncTask<std::string> task(
         &context, [](const std::stop_token&) -> std::string { return {"Success"}; },
         [&](const std::string& res) -> void {
           success_called = true;
@@ -52,7 +52,7 @@ TEST_CASE("AsyncTask executes work and returns result to UI thread", "[ui][async
     bool error_called = false;
     std::string error_msg;
 
-    ui::AsyncTask<std::string> task(
+    fmm::ui::AsyncTask<std::string> task(
         &context,
         [](const std::stop_token&) -> std::string { throw std::runtime_error("Failure"); },
         [](const std::string&) -> void {},
@@ -74,7 +74,7 @@ TEST_CASE("AsyncTask executes work and returns result to UI thread", "[ui][async
     const int sleep_ms = 10;
 
     {
-      ui::AsyncTask<std::string> task(
+      fmm::ui::AsyncTask<std::string> task(
           &context,
           [sleep_ms](const std::stop_token& stoken) -> std::string {
             while (!stoken.stop_requested()) {

@@ -6,10 +6,10 @@
 #include <QPointer>
 #include <stdexcept>
 
-namespace ui {
+namespace fmm::ui {
 
-InventoryModel::InventoryModel(std::shared_ptr<application::InventoryService> inventory_service,
-                               QObject* parent)
+InventoryModel::InventoryModel(
+    std::shared_ptr<fmm::application::InventoryService> inventory_service, QObject* parent)
     : QAbstractListModel(parent), m_inventory_service(std::move(inventory_service)) {
   if (!m_inventory_service) {
     throw std::invalid_argument("InventoryService cannot be null");
@@ -86,4 +86,4 @@ void InventoryModel::reload() {
       });
 }
 
-} // namespace ui
+} // namespace fmm::ui

@@ -9,7 +9,7 @@
 #include <thread>
 #include <utility>
 
-namespace ui {
+namespace fmm::ui {
 
 template <typename T> class AsyncTask {
 public:
@@ -47,4 +47,4 @@ private:
   std::jthread m_thread;
 };
 
-} // namespace ui
+} // namespace fmm::ui

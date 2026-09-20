@@ -7,7 +7,7 @@
 #include <QSortFilterProxyModel>
 #include <QVBoxLayout>
 
-namespace ui {
+namespace fmm::ui {
 
 InventoryWidget::InventoryWidget(InventoryModel* inventory_model, QWidget* parent)
     : QWidget(parent), m_inventory_model(inventory_model) {
@@ -34,4 +34,4 @@ void InventoryWidget::setupUi() {
   layout->addWidget(m_list_view);
 }
 
-} // namespace ui
+} // namespace fmm::ui

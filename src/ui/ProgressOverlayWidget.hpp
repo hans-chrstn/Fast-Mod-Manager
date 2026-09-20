@@ -6,7 +6,7 @@ class QLabel;
 class QProgressBar;
 class QPushButton;
 
-namespace ui {
+namespace fmm::ui {
 
 class ProgressOverlayWidget : public QWidget {
   Q_OBJECT
@@ -31,4 +31,4 @@ private:
   QPushButton* m_cancel_button{nullptr};
 };
 
-} // namespace ui
+} // namespace fmm::ui
