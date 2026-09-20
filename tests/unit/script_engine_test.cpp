@@ -6,14 +6,15 @@ TEST_CASE("StubScriptEngine evaluates mock scripts", "[infrastructure][StubScrip
   fmm::infrastructure::StubScriptEngine engine;
 
   SECTION("Successfully evaluates valid script string") {
-    auto result = engine.evaluate("return 42");
+    auto result = engine.evaluateGamePlugin("return 42");
     REQUIRE(result.has_value());
-    REQUIRE(result.value() == "Evaluated: return 42");
+    REQUIRE(result.value().identity.id() == "stub_game");
+    REQUIRE(result.value().capabilities.supports_plugins == true);
   }
 
   SECTION("Fails on empty script") {
-    auto result = engine.evaluate("");
+    auto result = engine.evaluateGamePlugin("");
     REQUIRE_FALSE(result.has_value());
-    REQUIRE(result.error() == "Empty script");
+    REQUIRE(result.error().code == fmm::core::GamePluginErrorCode::InvalidFormat);
   }
 }

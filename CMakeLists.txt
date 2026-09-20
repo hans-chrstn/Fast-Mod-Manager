@@ -39,7 +39,6 @@ endif()
 
 add_library(core OBJECT
   src/core/IPlugin.hpp
-  src/core/IGameAdapter.hpp
   src/core/IGameCatalog.hpp
   src/core/IGamePluginLoader.hpp
   src/core/IGamePluginScanner.hpp
@@ -84,7 +83,6 @@ add_library(infrastructure OBJECT
   src/infrastructure/StubScriptEngine.cpp
   src/infrastructure/StubProcessLauncher.cpp
   src/infrastructure/FixtureFilesystemScanner.cpp
-  src/infrastructure/LuaGameAdapter.cpp
   src/infrastructure/FilesystemGamePluginScanner.cpp
   src/infrastructure/LuaGamePluginLoader.cpp
   src/infrastructure/LibArchivePackageDetector.cpp

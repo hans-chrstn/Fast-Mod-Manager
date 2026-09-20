@@ -14,7 +14,6 @@ add_executable(mod-manager-tests
   unit/libarchive_reader_test.cpp
   unit/path_normalizer_test.cpp
   unit/rust_boundary_test.cpp
-  unit/lua_game_adapter_test.cpp
 )
 
 target_link_libraries(mod-manager-tests

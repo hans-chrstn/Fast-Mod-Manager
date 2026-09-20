@@ -8,15 +8,15 @@ namespace fmm::application {
 
 class GameCatalogImpl : public core::IGameCatalog {
 public:
-  void registerAdapter(std::shared_ptr<core::IGameAdapter> adapter) override;
+  void registerGame(domain::GameDefinition definition) override;
   void clear() override;
 
   [[nodiscard]] auto getAvailableGames() const -> std::vector<domain::GameIdentity> override;
-  [[nodiscard]] auto getAdapter(const domain::GameIdentity& identity) const
-      -> std::shared_ptr<core::IGameAdapter> override;
+  [[nodiscard]] auto getGameDefinition(const domain::GameIdentity& identity) const
+      -> std::optional<domain::GameDefinition> override;
 
 private:
-  std::vector<std::shared_ptr<core::IGameAdapter>> m_adapters;
+  std::vector<domain::GameDefinition> m_definitions;
 };
 
 } // namespace fmm::application

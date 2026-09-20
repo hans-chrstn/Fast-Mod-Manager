@@ -1,8 +1,9 @@
 #pragma once
 
-#include "core/IGameAdapter.hpp"
+#include "core/GamePluginError.hpp"
+#include "domain/GameDefinition.hpp"
 
-#include <memory>
+#include <expected>
 #include <string>
 
 namespace fmm::core {
@@ -12,7 +13,7 @@ public:
   virtual ~IGamePluginLoader() = default;
 
   [[nodiscard]] virtual auto loadPlugin(const std::string& script_path) const
-      -> std::shared_ptr<IGameAdapter> = 0;
+      -> std::expected<domain::GameDefinition, GamePluginError> = 0;
 };
 
 } // namespace fmm::core

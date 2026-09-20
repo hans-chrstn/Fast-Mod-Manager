@@ -1,5 +1,8 @@
 #pragma once
 
+#include "core/GamePluginError.hpp"
+#include "domain/GameDefinition.hpp"
+
 #include <expected>
 #include <string>
 
@@ -9,8 +12,8 @@ class IScriptEngine {
 public:
   virtual ~IScriptEngine() = default;
 
-  [[nodiscard]] virtual auto evaluate(const std::string& script) const
-      -> std::expected<std::string, std::string> = 0;
+  [[nodiscard]] virtual auto evaluateGamePlugin(const std::string& script_content) const
+      -> std::expected<domain::GameDefinition, GamePluginError> = 0;
 };
 
 } // namespace fmm::core

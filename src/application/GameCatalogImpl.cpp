@@ -5,31 +5,28 @@
 
 namespace fmm::application {
 
-void GameCatalogImpl::registerAdapter(std::shared_ptr<core::IGameAdapter> adapter) {
-  if (adapter) {
-    m_adapters.push_back(std::move(adapter));
-  }
+void GameCatalogImpl::registerGame(domain::GameDefinition definition) {
+  m_definitions.push_back(std::move(definition));
 }
 
-void GameCatalogImpl::clear() { m_adapters.clear(); }
+void GameCatalogImpl::clear() { m_definitions.clear(); }
 
 auto GameCatalogImpl::getAvailableGames() const -> std::vector<domain::GameIdentity> {
   std::vector<domain::GameIdentity> games;
-  games.reserve(m_adapters.size());
-  std::ranges::transform(m_adapters, std::back_inserter(games),
-                         [](const auto& adapter) -> auto { return adapter->getIdentity(); });
+  games.reserve(m_definitions.size());
+  std::ranges::transform(m_definitions, std::back_inserter(games),
+                         [](const auto& def) -> auto { return def.identity; });
   return games;
 }
 
-auto GameCatalogImpl::getAdapter(const domain::GameIdentity& identity) const
-    -> std::shared_ptr<core::IGameAdapter> {
-  auto iterator = std::ranges::find_if(m_adapters, [&identity](const auto& adapter) -> bool {
-    return adapter->getIdentity() == identity;
-  });
-  if (iterator != m_adapters.end()) {
+auto GameCatalogImpl::getGameDefinition(const domain::GameIdentity& identity) const
+    -> std::optional<domain::GameDefinition> {
+  auto iterator = std::ranges::find_if(
+      m_definitions, [&identity](const auto& def) -> bool { return def.identity == identity; });
+  if (iterator != m_definitions.end()) {
     return *iterator;
   }
-  return nullptr;
+  return std::nullopt;
 }
 
 } // namespace fmm::application

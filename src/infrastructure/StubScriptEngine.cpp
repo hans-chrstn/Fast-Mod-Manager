@@ -2,12 +2,26 @@
 
 namespace fmm::infrastructure {
 
-auto StubScriptEngine::evaluate(const std::string& script) const
-    -> std::expected<std::string, std::string> {
-  if (script.empty()) {
-    return std::unexpected("Empty script");
+auto StubScriptEngine::evaluateGamePlugin(const std::string& script_content) const
+    -> std::expected<domain::GameDefinition, core::GamePluginError> {
+  if (script_content.empty()) {
+    return std::unexpected(core::GamePluginError{.code = core::GamePluginErrorCode::InvalidFormat,
+                                                 .message = "Script content cannot be empty"});
   }
-  return "Evaluated: " + script;
+
+  domain::GameCapabilities caps;
+  caps.supports_load_order = true;
+  caps.supports_plugins = true;
+  caps.supports_script_extender = true;
+
+  domain::GameDefinition def{
+      .identity = domain::GameIdentity("stub_game", "Stub Game"),
+      .capabilities = caps,
+      .executable_name = "stub_game.exe",
+      .mod_directory_name = "Mods",
+      .required_tools = {},
+  };
+  return def;
 }
 
 } // namespace fmm::infrastructure

@@ -6,8 +6,8 @@ namespace fmm::infrastructure {
 
 class StubScriptEngine : public core::IScriptEngine {
 public:
-  [[nodiscard]] auto evaluate(const std::string& script) const
-      -> std::expected<std::string, std::string> override;
+  [[nodiscard]] auto evaluateGamePlugin(const std::string& script_content) const
+      -> std::expected<domain::GameDefinition, core::GamePluginError> override;
 };
 
 } // namespace fmm::infrastructure
