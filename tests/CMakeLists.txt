@@ -10,7 +10,6 @@ add_executable(mod-manager-tests
   unit/process_launcher_test.cpp
   unit/fixture_filesystem_scanner_test.cpp
   unit/async_task_test.cpp
-  unit/game_manager_test.cpp
   unit/libarchive_package_detector_test.cpp
   unit/libarchive_reader_test.cpp
   unit/path_normalizer_test.cpp

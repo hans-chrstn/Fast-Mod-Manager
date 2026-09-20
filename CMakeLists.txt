@@ -39,9 +39,12 @@ endif()
 
 add_library(core OBJECT
   src/core/IPlugin.hpp
-  src/core/PackagePlan.hpp
-  src/core/GameFsPlan.hpp
-  src/core/LaunchPlan.hpp
+  src/core/IGameAdapter.hpp
+  src/core/IGameCatalog.hpp
+  src/core/IGamePluginLoader.hpp
+  src/core/IGamePluginScanner.hpp
+  src/core/IActiveGameSelection.hpp
+  src/core/IModScanner.hpp
   src/core/PathNormalizer.cpp
 )
 target_include_directories(core PUBLIC src)
@@ -59,6 +62,9 @@ endif()
 
 add_library(application OBJECT
   src/application/FakeInventoryService.hpp
+  src/application/GameCatalogImpl.cpp
+  src/application/ActiveGameSelectionImpl.cpp
+  src/application/InventoryService.hpp
 )
 target_include_directories(application PUBLIC src)
 target_link_libraries(application PUBLIC domain core)
@@ -79,10 +85,11 @@ add_library(infrastructure OBJECT
   src/infrastructure/StubProcessLauncher.cpp
   src/infrastructure/FixtureFilesystemScanner.cpp
   src/infrastructure/LuaGameAdapter.cpp
-  src/infrastructure/GameManagerImpl.cpp
+  src/infrastructure/FilesystemGamePluginScanner.cpp
+  src/infrastructure/LuaGamePluginLoader.cpp
+  src/infrastructure/LibArchivePackageDetector.cpp
   src/infrastructure/DependencyValidatorImpl.cpp
   src/infrastructure/GameFsClient.cpp
-  src/infrastructure/LibArchivePackageDetector.cpp
   src/infrastructure/LibArchiveReader.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
