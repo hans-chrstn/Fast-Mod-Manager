@@ -9,7 +9,7 @@ TEST_CASE("StubScriptEngine evaluates mock scripts", "[infrastructure][StubScrip
     auto result = engine.evaluateGamePlugin("return 42");
     REQUIRE(result.has_value());
     REQUIRE(result.value().identity.id() == "stub_game");
-    REQUIRE(result.value().capabilities.supports_plugins == true);
+    REQUIRE(result.value().capabilities.hasRequiredFeature("plugins") == true);
   }
 
   SECTION("Fails on empty script") {

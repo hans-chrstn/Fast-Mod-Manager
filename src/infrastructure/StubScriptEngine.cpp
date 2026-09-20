@@ -10,9 +10,8 @@ auto StubScriptEngine::evaluateGamePlugin(const std::string& script_content) con
   }
 
   domain::GameCapabilities caps;
-  caps.supports_load_order = true;
-  caps.supports_plugins = true;
-  caps.supports_script_extender = true;
+  caps.filesystem_semantics = "windows";
+  caps.required_features = {"load_order", "plugins", "script_extender"};
 
   domain::GameDefinition def{
       .identity = domain::GameIdentity("stub_game", "Stub Game"),
