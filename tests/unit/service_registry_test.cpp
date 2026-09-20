@@ -39,6 +39,13 @@ TEST_CASE("ServiceRegistry manages service lifecycles", "[core][ServiceRegistry]
     REQUIRE(resolved->getValue() == 42);
   }
 
+  SECTION("Throws on re-registration of the same service") {
+    auto service1 = std::make_shared<TestServiceImpl>();
+    auto service2 = std::make_shared<TestServiceImpl>();
+    registry.registerService<ITestService>(service1);
+    REQUIRE_THROWS_AS(registry.registerService<ITestService>(service2), std::logic_error);
+  }
+
   SECTION("Throws on resolving unknown service") {
     REQUIRE_FALSE(registry.hasService<IOtherService>());
     REQUIRE_THROWS_AS(registry.resolve<IOtherService>(), std::runtime_error);

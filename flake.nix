@@ -38,6 +38,11 @@
         pkgs.clang-tools
         pkgs.python3
         pkgs.python3Packages.jsonschema
+        pkgs.cargo
+        pkgs.rustc
+        pkgs.rustfmt
+        pkgs.clippy
+        pkgs.corrosion
       ];
       mkProjectScript = name: script:
         pkgs.writeShellApplication {
@@ -92,6 +97,11 @@
           pkgs.shellcheck
           pkgs.python3
           pkgs.python3Packages.jsonschema
+          pkgs.cargo
+          pkgs.rustc
+          pkgs.rustfmt
+          pkgs.clippy
+          pkgs.corrosion
         ];
 
         shellHook = ''

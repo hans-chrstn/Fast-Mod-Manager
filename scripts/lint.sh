@@ -7,6 +7,7 @@ source "${PROJECT_SCRIPTS_DIR:-$SCRIPT_DIR}/common.sh"
 require_tool rg
 require_tool clang-tidy
 require_tool cppcheck
+require_tool cargo
 
 preset="${1:-debug}"
 shift || true
@@ -27,3 +28,13 @@ fi
 
 printf "%s\n" "${source_files[@]}" | xargs -I{} -P "$(nproc)" clang-tidy --quiet -p "build/$preset" "$PROJECT_SOURCE_ROOT/{}" 2>/dev/null
 cppcheck --project="$compile_commands" -i "$PROJECT_SOURCE_ROOT/build" -Dslots= -Dsignals= -DQ_SLOTS= -DQ_SIGNALS= -DQ_OBJECT= --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem
+
+if [[ -d "src/rust" ]]; then
+  cd src/rust
+  for d in */; do
+    if [[ -f "$d/Cargo.toml" ]]; then
+      (cd "$d" && cargo clippy -- -D warnings)
+    fi
+  done
+  cd "$PROJECT_SOURCE_ROOT"
+fi

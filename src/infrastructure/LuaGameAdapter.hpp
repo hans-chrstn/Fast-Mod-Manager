@@ -14,6 +14,7 @@ public:
 
   [[nodiscard]] auto getIdentity() const -> domain::GameIdentity override;
   [[nodiscard]] auto getCapabilities() const -> domain::GameCapabilities override;
+  [[nodiscard]] auto getGameDefinition() const -> domain::GameDefinition override;
 
 private:
   std::shared_ptr<core::IScriptEngine> m_script_engine;

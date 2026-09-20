@@ -25,4 +25,13 @@ auto LuaGameAdapter::getCapabilities() const -> domain::GameCapabilities {
   return caps;
 }
 
+auto LuaGameAdapter::getGameDefinition() const -> domain::GameDefinition {
+  domain::GameDefinition def;
+  def.game_id = getIdentity().id();
+  def.name = "Unknown Game";
+  def.executable_name = def.game_id + ".exe";
+  def.mod_directory_name = "Mods";
+  return def;
+}
+
 } // namespace fmm::infrastructure

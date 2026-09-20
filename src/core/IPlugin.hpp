@@ -1,18 +1,24 @@
 #pragma once
 
-#include <QString>
+#include "core/GameFsPlan.hpp"
+#include "core/LaunchPlan.hpp"
+#include "core/PackagePlan.hpp"
+
 #include <QtPlugin>
+#include <string>
 
 namespace core {
-
-class ServiceRegistry;
 
 class IPlugin {
 public:
   virtual ~IPlugin() = default;
 
-  [[nodiscard]] virtual auto name() const -> QString = 0;
-  virtual void initialize(ServiceRegistry& registry) = 0;
+  [[nodiscard]] virtual auto name() const -> std::string = 0;
+  virtual void initialize() = 0;
+
+  virtual void contributePackagePlan(PackagePlan& plan) = 0;
+  virtual void contributeGameFsPlan(GameFsPlan& plan) = 0;
+  virtual void contributeLaunchPlan(LaunchPlan& plan) = 0;
 };
 
 } // namespace core

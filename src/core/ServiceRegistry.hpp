@@ -16,7 +16,11 @@ public:
     if (!service) {
       throw std::invalid_argument("Cannot register a null service");
     }
-    m_services[std::type_index(typeid(Interface))] = std::static_pointer_cast<void>(service);
+    auto type_idx = std::type_index(typeid(Interface));
+    if (m_services.contains(type_idx)) {
+      throw std::logic_error("Service already registered");
+    }
+    m_services[type_idx] = std::static_pointer_cast<void>(service);
   }
 
   template <typename Interface> [[nodiscard]] auto resolve() const -> std::shared_ptr<Interface> {

@@ -17,8 +17,13 @@ find_package(LibArchive REQUIRED)
 
 qt_standard_project_setup()
 
+find_package(Corrosion REQUIRED)
+
+corrosion_import_crate(MANIFEST_PATH src/rust/fmm-core/Cargo.toml)
+
 add_library(domain OBJECT
   src/domain/ProfileIdentity.cpp
+  src/domain/GameDefinition.hpp
 )
 target_include_directories(domain PUBLIC src)
 
@@ -33,6 +38,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 add_library(core OBJECT
+  src/core/IPlugin.hpp
+  src/core/PackagePlan.hpp
+  src/core/GameFsPlan.hpp
+  src/core/LaunchPlan.hpp
   src/core/PathNormalizer.cpp
 )
 target_include_directories(core PUBLIC src)
@@ -76,7 +85,7 @@ add_library(infrastructure OBJECT
   src/infrastructure/LibArchiveReader.cpp
 )
 target_include_directories(infrastructure PUBLIC src)
-target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core LibArchive::LibArchive)
+target_link_libraries(infrastructure PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets domain core LibArchive::LibArchive fmm_core)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(infrastructure PRIVATE

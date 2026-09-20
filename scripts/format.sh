@@ -6,6 +6,7 @@ source "${PROJECT_SCRIPTS_DIR:-$SCRIPT_DIR}/common.sh"
 
 require_tool rg
 require_tool clang-format
+require_tool cargo
 
 mode="write"
 if [[ "${1:-}" == "--check" ]]; then
@@ -26,6 +27,26 @@ fi
 
 if [[ "$mode" == "check" ]]; then
   clang-format --dry-run --Werror "${source_files[@]}"
+
+  if [[ -d "src/rust" ]]; then
+    cd src/rust
+    for d in */; do
+      if [[ -f "$d/Cargo.toml" ]]; then
+        (cd "$d" && cargo fmt -- --check)
+      fi
+    done
+    cd "$PROJECT_SOURCE_ROOT"
+  fi
 else
   clang-format -i "${source_files[@]}"
+
+  if [[ -d "src/rust" ]]; then
+    cd src/rust
+    for d in */; do
+      if [[ -f "$d/Cargo.toml" ]]; then
+        (cd "$d" && cargo fmt)
+      fi
+    done
+    cd "$PROJECT_SOURCE_ROOT"
+  fi
 fi
