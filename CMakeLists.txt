@@ -24,6 +24,7 @@ corrosion_import_crate(MANIFEST_PATH src/rust/fmm-core/Cargo.toml)
 add_library(domain OBJECT
   src/domain/ProfileIdentity.cpp
   src/domain/GameDefinition.hpp
+  src/domain/PlannerInput.hpp
 )
 target_include_directories(domain PUBLIC src)
 
