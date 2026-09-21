@@ -26,6 +26,7 @@ add_library(domain OBJECT
   src/domain/GameId.hpp
   src/domain/PluginId.hpp
   src/domain/PackagePlan.hpp
+  src/domain/PackageRootMapping.hpp
   src/domain/GameDefinition.hpp
   src/domain/PlannerInput.hpp
 )

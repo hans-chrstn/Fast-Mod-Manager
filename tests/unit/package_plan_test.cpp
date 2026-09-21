@@ -25,6 +25,8 @@ static_assert(std::is_same_v<decltype(std::declval<const PackagePlan&>().package
                              const PackageLocation&>);
 static_assert(std::is_same_v<decltype(std::declval<const PackagePlan&>().entries()),
                              const std::vector<PackageLayoutEntry>&>);
+static_assert(std::is_same_v<decltype(std::declval<const PackagePlan&>().rootMappings()),
+                             const std::vector<PackageRootMapping>&>);
 static_assert(
     std::is_same_v<decltype(&fmm::core::IPlugin::contributePackagePlan), PackagePlanContribution>);
 static_assert(!std::is_constructible_v<PackagePlan, std::string, std::string, std::string>);
@@ -32,16 +34,17 @@ static_assert(!std::is_constructible_v<PackagePlan, std::string, std::string, st
 TEST_CASE("PackagePlan owns typed package identity and location", "[domain][package-plan]") {
   const PackageLocation staging_location{.staging_path =
                                              std::filesystem::path{"/managed/packages/package-a"}};
-  const PackagePlan staging_plan(PackageId{"package-a"}, staging_location, {});
-  const PackagePlan staging_plan_copy(PackageId{"package-a"}, staging_location, {});
+  const PackagePlan staging_plan(PackageId{"package-a"}, staging_location, {}, {});
+  const PackagePlan staging_plan_copy(PackageId{"package-a"}, staging_location, {}, {});
 
   REQUIRE(staging_plan == staging_plan_copy);
   REQUIRE(staging_plan.packageId() == PackageId{"package-a"});
   REQUIRE(staging_plan.packageLocation() == staging_location);
   REQUIRE(staging_plan.entries().empty());
+  REQUIRE(staging_plan.rootMappings().empty());
 
   const PackageLocation object_location{.object_store_ref = "sha256:package-b"};
-  const PackagePlan object_plan(PackageId{"package-b"}, object_location, {});
+  const PackagePlan object_plan(PackageId{"package-b"}, object_location, {}, {});
 
   REQUIRE(object_plan.packageLocation() == object_location);
   REQUIRE(object_plan != staging_plan);
@@ -58,11 +61,29 @@ TEST_CASE("PackagePlan preserves source entry kinds and order", "[domain][packag
       PackageLayoutEntry{PackageRelativePath{"links/current"}, PackageEntryKind::SymbolicLink},
       PackageLayoutEntry{PackageRelativePath{native_byte_path}, PackageEntryKind::RegularFile},
   };
+  const std::vector<PackageRootMapping> root_mappings{
+      PackageRootMapping{PackageRelativePath{"Root"}, GameRelativePath{""}},
+      PackageRootMapping{PackageRelativePath{"Data"}, GameRelativePath{"Data"}},
+  };
   const PackagePlan plan(
       PackageId{"package-layout"},
-      PackageLocation{.staging_path = std::filesystem::path{"/managed/package-layout"}}, entries);
+      PackageLocation{.staging_path = std::filesystem::path{"/managed/package-layout"}}, entries,
+      root_mappings);
+  const PackagePlan plan_copy(
+      PackageId{"package-layout"},
+      PackageLocation{.staging_path = std::filesystem::path{"/managed/package-layout"}}, entries,
+      root_mappings);
+  const PackagePlan reversed_mappings_plan(
+      PackageId{"package-layout"},
+      PackageLocation{.staging_path = std::filesystem::path{"/managed/package-layout"}}, entries,
+      std::vector<PackageRootMapping>(root_mappings.rbegin(), root_mappings.rend()));
 
+  REQUIRE(plan == plan_copy);
+  REQUIRE(plan != reversed_mappings_plan);
   REQUIRE(plan.entries() == entries);
+  REQUIRE(plan.rootMappings() == root_mappings);
+  REQUIRE(plan.rootMappings().at(0).packageRoot() == PackageRelativePath{"Root"});
+  REQUIRE(plan.rootMappings().at(1).packageRoot() == PackageRelativePath{"Data"});
   REQUIRE(plan.entries().at(0).relativePath() == PackageRelativePath{"payload/loader.so"});
   REQUIRE(plan.entries().at(0).kind() == PackageEntryKind::RegularFile);
   REQUIRE(plan.entries().at(1).kind() == PackageEntryKind::Directory);
