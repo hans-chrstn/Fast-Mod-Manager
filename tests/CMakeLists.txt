@@ -23,7 +23,10 @@ endif()
 add_executable(mod-manager-tests
   smoke_test.cpp
   unit/profile_identity_test.cpp
+  unit/typed_identity_test.cpp
+  unit/package_plan_test.cpp
   unit/planner_input_test.cpp
+  unit/game_catalog_test.cpp
   unit/json_profile_persistence_test.cpp
   unit/json_package_catalog_test.cpp
   unit/catalog_inventory_service_test.cpp

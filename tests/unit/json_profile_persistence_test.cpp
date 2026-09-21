@@ -2,6 +2,8 @@
 
 #include <QDir>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <catch2/catch_test_macros.hpp>
 #include <filesystem>
 #include <fstream>
@@ -74,13 +76,61 @@ TEST_CASE("JsonProfilePersistence schema and storage", "[infrastructure][persist
 
   SECTION("Saving and loading state successfully preserves state") {
     ProfileState state;
-    state.selected_game_id = "test_game";
+    state.selected_game_id = GameId{"test_game"};
     auto save_result = persistence.saveState(identity, state);
     REQUIRE(save_result.has_value());
 
     auto load_result = persistence.loadState(identity);
     REQUIRE(load_result.has_value());
-    REQUIRE(load_result->selected_game_id == "test_game");
+    REQUIRE(load_result->selected_game_id == GameId{"test_game"});
+  }
+
+  SECTION("State JSON keeps the selected game string representation") {
+    ProfileState state{.selected_game_id = GameId{"test_game"}};
+    REQUIRE(persistence.saveState(identity, state).has_value());
+
+    QFile file(QString::fromStdString((temp_dir / "TestProfile" / "state.json").string()));
+    REQUIRE(file.open(QIODevice::ReadOnly));
+    const auto document = QJsonDocument::fromJson(file.readAll());
+    REQUIRE(document.isObject());
+    REQUIRE(document.object()["selected_game_id"].isString());
+    REQUIRE(document.object()["selected_game_id"].toString() == "test_game");
+  }
+
+  SECTION("Unselected state preserves the empty string representation") {
+    REQUIRE(persistence.saveState(identity, ProfileState{}).has_value());
+
+    QFile file(QString::fromStdString((temp_dir / "TestProfile" / "state.json").string()));
+    REQUIRE(file.open(QIODevice::ReadOnly));
+    const auto document = QJsonDocument::fromJson(file.readAll());
+    REQUIRE(document.isObject());
+    REQUIRE(document.object()["selected_game_id"].isString());
+    REQUIRE(document.object()["selected_game_id"].toString().isEmpty());
+
+    auto load_result = persistence.loadState(identity);
+    REQUIRE(load_result.has_value());
+    REQUIRE_FALSE(load_result->selected_game_id.has_value());
+  }
+
+  SECTION("Missing and empty selected game values load as no selection") {
+    const auto profile_dir = temp_dir / "TestProfile";
+    std::filesystem::create_directories(profile_dir);
+
+    {
+      std::ofstream out(profile_dir / "state.json");
+      out << R"({})";
+    }
+    auto missing_result = persistence.loadState(identity);
+    REQUIRE(missing_result.has_value());
+    REQUIRE_FALSE(missing_result->selected_game_id.has_value());
+
+    {
+      std::ofstream out(profile_dir / "state.json");
+      out << R"({ "selected_game_id": "" })";
+    }
+    auto empty_result = persistence.loadState(identity);
+    REQUIRE(empty_result.has_value());
+    REQUIRE_FALSE(empty_result->selected_game_id.has_value());
   }
 
   std::filesystem::remove_all(temp_dir);

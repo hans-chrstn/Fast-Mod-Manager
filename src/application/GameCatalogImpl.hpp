@@ -12,7 +12,7 @@ public:
   void clear() override;
 
   [[nodiscard]] auto getAvailableGames() const -> std::vector<domain::GameIdentity> override;
-  [[nodiscard]] auto getGameDefinition(const domain::GameIdentity& identity) const
+  [[nodiscard]] auto getGameDefinition(const domain::GameId& game_id) const
       -> std::optional<domain::GameDefinition> override;
 
 private:

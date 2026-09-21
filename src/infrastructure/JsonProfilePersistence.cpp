@@ -111,7 +111,10 @@ auto JsonProfilePersistence::loadState(const domain::ProfileIdentity& identity)
   domain::ProfileState state;
 
   if (obj.contains("selected_game_id") && obj["selected_game_id"].isString()) {
-    state.selected_game_id = obj["selected_game_id"].toString().toStdString();
+    auto selected_game_id = obj["selected_game_id"].toString().toStdString();
+    if (!selected_game_id.empty()) {
+      state.selected_game_id = domain::GameId(std::move(selected_game_id));
+    }
   }
 
   return state;
@@ -136,7 +139,9 @@ auto JsonProfilePersistence::saveState(const domain::ProfileIdentity& identity,
   }
 
   QJsonObject obj;
-  obj["selected_game_id"] = QString::fromStdString(state.selected_game_id);
+  obj["selected_game_id"] = state.selected_game_id.has_value()
+                                ? QString::fromStdString(state.selected_game_id->value())
+                                : QString{};
 
   QJsonDocument doc(obj);
   if (file.write(doc.toJson()) == -1) {

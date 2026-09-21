@@ -19,10 +19,10 @@ auto GameCatalogImpl::getAvailableGames() const -> std::vector<domain::GameIdent
   return games;
 }
 
-auto GameCatalogImpl::getGameDefinition(const domain::GameIdentity& identity) const
+auto GameCatalogImpl::getGameDefinition(const domain::GameId& game_id) const
     -> std::optional<domain::GameDefinition> {
   auto iterator = std::ranges::find_if(
-      m_definitions, [&identity](const auto& def) -> bool { return def.identity == identity; });
+      m_definitions, [&game_id](const auto& def) -> bool { return def.identity.id() == game_id; });
   if (iterator != m_definitions.end()) {
     return *iterator;
   }

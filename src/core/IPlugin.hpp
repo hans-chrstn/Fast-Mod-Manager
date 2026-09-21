@@ -2,7 +2,7 @@
 
 #include "core/GameFsPlan.hpp"
 #include "core/LaunchPlan.hpp"
-#include "core/PackagePlan.hpp"
+#include "domain/PackagePlan.hpp"
 
 #include <QtPlugin>
 #include <string>
@@ -16,7 +16,7 @@ public:
   [[nodiscard]] virtual auto name() const -> std::string = 0;
   virtual void initialize() = 0;
 
-  virtual void contributePackagePlan(PackagePlan& plan) = 0;
+  virtual void contributePackagePlan(domain::PackagePlan& plan) = 0;
   virtual void contributeGameFsPlan(GameFsPlan& plan) = 0;
   virtual void contributeLaunchPlan(LaunchPlan& plan) = 0;
 };

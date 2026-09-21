@@ -16,7 +16,7 @@ public:
   virtual void clear() = 0;
 
   [[nodiscard]] virtual auto getAvailableGames() const -> std::vector<domain::GameIdentity> = 0;
-  [[nodiscard]] virtual auto getGameDefinition(const domain::GameIdentity& identity) const
+  [[nodiscard]] virtual auto getGameDefinition(const domain::GameId& game_id) const
       -> std::optional<domain::GameDefinition> = 0;
 };
 

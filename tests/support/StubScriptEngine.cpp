@@ -14,7 +14,7 @@ auto StubScriptEngine::evaluateGamePlugin(const std::string& script_content) con
   caps.required_features = {"load_order", "plugins", "script_extender"};
 
   domain::GameDefinition def{
-      .identity = domain::GameIdentity("stub_game", "Stub Game"),
+      .identity = domain::GameIdentity(domain::GameId{"stub_game"}, "Stub Game"),
       .capabilities = caps,
       .executable_name = "stub_game.exe",
       .mod_directory_name = "Mods",

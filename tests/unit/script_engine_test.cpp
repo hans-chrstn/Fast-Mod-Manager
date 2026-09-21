@@ -2,13 +2,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using fmm::domain::GameId;
+
 TEST_CASE("StubScriptEngine evaluates mock scripts", "[test-support][StubScriptEngine]") {
   fmm::test_support::StubScriptEngine engine;
 
   SECTION("Successfully evaluates valid script string") {
     auto result = engine.evaluateGamePlugin("return 42");
     REQUIRE(result.has_value());
-    REQUIRE(result.value().identity.id() == "stub_game");
+    REQUIRE(result.value().identity.id() == GameId{"stub_game"});
     REQUIRE(result.value().capabilities.hasRequiredFeature("plugins") == true);
   }
 

@@ -1,16 +1,18 @@
 #pragma once
 
+#include "domain/GameId.hpp"
 #include "domain/PackageId.hpp"
+#include "domain/PluginId.hpp"
 
-#include <string>
+#include <optional>
 #include <vector>
 
 namespace fmm::domain {
 
 struct ProfileState {
-  std::string selected_game_id;
+  std::optional<GameId> selected_game_id;
   std::vector<PackageId> enabled_packages;
-  std::vector<std::string> load_order;
+  std::vector<PluginId> load_order;
 };
 
 } // namespace fmm::domain
