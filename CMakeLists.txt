@@ -25,6 +25,8 @@ add_library(domain OBJECT
   src/domain/ProfileIdentity.cpp
   src/domain/GameId.hpp
   src/domain/PluginId.hpp
+  src/domain/CompiledNamespace.cpp
+  src/domain/CompiledNamespace.hpp
   src/domain/ConflictResolution.cpp
   src/domain/ConflictResolution.hpp
   src/domain/FileOwnershipGraph.cpp

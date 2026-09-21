@@ -24,6 +24,7 @@ add_executable(mod-manager-tests
   smoke_test.cpp
   unit/profile_identity_test.cpp
   unit/typed_identity_test.cpp
+  unit/compiled_namespace_test.cpp
   unit/conflict_resolution_test.cpp
   unit/file_ownership_graph_test.cpp
   unit/package_dependency_graph_test.cpp
