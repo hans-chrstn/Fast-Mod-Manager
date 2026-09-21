@@ -25,6 +25,12 @@ add_library(domain OBJECT
   src/domain/ProfileIdentity.cpp
   src/domain/GameId.hpp
   src/domain/PluginId.hpp
+  src/domain/ConflictResolution.cpp
+  src/domain/ConflictResolution.hpp
+  src/domain/FileOwnershipGraph.cpp
+  src/domain/FileOwnershipGraph.hpp
+  src/domain/PackageDependencyGraph.cpp
+  src/domain/PackageDependencyGraph.hpp
   src/domain/PackagePlan.hpp
   src/domain/PackageRootMapping.hpp
   src/domain/GameDefinition.hpp
