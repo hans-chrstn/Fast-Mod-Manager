@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <set>
 #include <string>
 #include <string_view>
@@ -28,6 +29,51 @@ struct CompiledEntryData final {
   CompiledNamespaceEntryOrigin origin{CompiledNamespaceEntryOrigin::SyntheticDirectory};
   std::optional<PackagePathClaim> selected_claim;
 };
+
+struct PackageSourceData final {
+  const PackageLocation* location{};
+  std::map<std::string, std::optional<PackageEntryKind>, NativeByteLess> entry_kinds;
+};
+
+using PackageSourceIndex = std::map<PackageId, PackageSourceData>;
+
+auto sourceMappingError(NamespaceSourceMappingErrorCode code,
+                        std::optional<PackageId> package_id = std::nullopt,
+                        std::optional<PackageId> related_package_id = std::nullopt,
+                        std::optional<GameRelativePath> entry_path = std::nullopt,
+                        std::optional<PackageRelativePath> package_relative_path = std::nullopt)
+    -> std::unexpected<NamespaceSourceMappingError> {
+  return std::unexpected(
+      NamespaceSourceMappingError{code, std::move(package_id), std::move(related_package_id),
+                                  std::move(entry_path), std::move(package_relative_path)});
+}
+
+auto indexPackageSources(const std::vector<NamespacePackagePlanRecord>& package_snapshot)
+    -> std::expected<PackageSourceIndex, NamespaceSourceMappingError> {
+  PackageSourceIndex packages;
+  for (const auto& record : package_snapshot) {
+    const auto& lookup_id = record.lookupPackageId();
+    const auto& plan = record.packagePlan();
+    if (lookup_id != plan.packageId()) {
+      return sourceMappingError(NamespaceSourceMappingErrorCode::MismatchedPackageId, lookup_id,
+                                plan.packageId());
+    }
+
+    PackageSourceData source_data{.location = &plan.packageLocation(), .entry_kinds = {}};
+    for (const auto& entry : plan.entries()) {
+      auto [position, inserted] =
+          source_data.entry_kinds.emplace(entry.relativePath().nativeBytes(), entry.kind());
+      if (!inserted && position->second.has_value() && position->second.value() != entry.kind()) {
+        position->second = std::nullopt;
+      }
+    }
+
+    if (!packages.emplace(lookup_id, std::move(source_data)).second) {
+      return sourceMappingError(NamespaceSourceMappingErrorCode::DuplicatePackage, lookup_id);
+    }
+  }
+  return packages;
+}
 
 auto invalidDecision() -> std::unexpected<NamespaceCompilationError> {
   return std::unexpected(
@@ -141,6 +187,58 @@ auto CompiledNamespace::compile(const ConflictResolutionReport& report)
       });
 
   return CompiledNamespace{std::move(entries)};
+}
+
+auto CompiledNamespace::mapSources(const std::vector<NamespacePackagePlanRecord>& package_snapshot)
+    const -> std::expected<SourceMappedNamespace, NamespaceSourceMappingError> {
+  auto packages = indexPackageSources(package_snapshot);
+  if (!packages.has_value()) {
+    return std::unexpected(packages.error());
+  }
+
+  auto mapped_entries = m_entries;
+  for (auto& entry : mapped_entries) {
+    if (entry.kind() == PackageEntryKind::Directory) {
+      if (entry.selectedClaim().has_value() || entry.sourceReference().has_value()) {
+        return sourceMappingError(NamespaceSourceMappingErrorCode::InvalidEntryKind, std::nullopt,
+                                  std::nullopt, entry.path());
+      }
+      continue;
+    }
+
+    if (!entry.selectedClaim().has_value() || entry.selectedClaim()->kind() != entry.kind() ||
+        entry.selectedClaim()->kind() == PackageEntryKind::Directory) {
+      return sourceMappingError(NamespaceSourceMappingErrorCode::InvalidEntryKind, std::nullopt,
+                                std::nullopt, entry.path());
+    }
+
+    const auto& selected = entry.selectedClaim().value();
+    const auto package = packages->find(selected.packageId());
+    if (package == packages->end()) {
+      return sourceMappingError(NamespaceSourceMappingErrorCode::MissingPackage,
+                                selected.packageId(), std::nullopt, entry.path(),
+                                selected.packageRelativePath());
+    }
+
+    const auto source_entry =
+        package->second.entry_kinds.find(selected.packageRelativePath().nativeBytes());
+    if (source_entry == package->second.entry_kinds.end()) {
+      return sourceMappingError(NamespaceSourceMappingErrorCode::MissingSourceEntry,
+                                selected.packageId(), std::nullopt, entry.path(),
+                                selected.packageRelativePath());
+    }
+    if (!source_entry->second.has_value() || source_entry->second.value() != entry.kind() ||
+        source_entry->second.value() == PackageEntryKind::Directory) {
+      return sourceMappingError(NamespaceSourceMappingErrorCode::InvalidEntryKind,
+                                selected.packageId(), std::nullopt, entry.path(),
+                                selected.packageRelativePath());
+    }
+
+    entry.m_source_reference = NamespaceSourceReference{
+        selected.packageId(), selected.packageRelativePath(), *package->second.location};
+  }
+
+  return SourceMappedNamespace{std::move(mapped_entries)};
 }
 
 } // namespace fmm::domain
