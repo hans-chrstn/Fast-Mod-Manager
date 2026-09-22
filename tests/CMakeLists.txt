@@ -50,6 +50,7 @@ add_executable(mod-manager-tests
   unit/rust_boundary_test.cpp
   unit/staging_repository_test.cpp
   integration/archive_ingestion_test.cpp
+  integration/namespace_planning_test.cpp
 )
 
 target_link_libraries(mod-manager-tests
