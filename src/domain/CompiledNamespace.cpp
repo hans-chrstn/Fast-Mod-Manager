@@ -28,6 +28,10 @@ struct CompiledEntryData final {
   PackageEntryKind kind{PackageEntryKind::Directory};
   CompiledNamespaceEntryOrigin origin{CompiledNamespaceEntryOrigin::SyntheticDirectory};
   std::optional<PackagePathClaim> selected_claim;
+  NamespaceEntryExplanationKind explanation_kind{
+      NamespaceEntryExplanationKind::SyntheticAncestorDirectory};
+  std::vector<PackagePathClaim> contenders;
+  std::optional<PackagePathClaim> explanation_selected_claim;
 };
 
 struct PackageSourceData final {
@@ -93,12 +97,18 @@ auto compileDecision(const ExactPathDecision& decision)
       return CompiledEntryData{.path = decision.path(),
                                .kind = PackageEntryKind::Directory,
                                .origin = CompiledNamespaceEntryOrigin::SingleClaim,
-                               .selected_claim = std::nullopt};
+                               .selected_claim = std::nullopt,
+                               .explanation_kind = NamespaceEntryExplanationKind::UncontestedClaim,
+                               .contenders = decision.claims(),
+                               .explanation_selected_claim = selected_claim};
     }
     return CompiledEntryData{.path = decision.path(),
                              .kind = selected_claim->kind(),
                              .origin = CompiledNamespaceEntryOrigin::SingleClaim,
-                             .selected_claim = selected_claim};
+                             .selected_claim = selected_claim,
+                             .explanation_kind = NamespaceEntryExplanationKind::UncontestedClaim,
+                             .contenders = decision.claims(),
+                             .explanation_selected_claim = selected_claim};
   case ExactPathDecisionKind::MergedDirectories:
     if (decision.claims().empty() || selected_claim.has_value() ||
         !std::ranges::all_of(decision.claims(), [](const PackagePathClaim& claim) -> bool {
@@ -109,7 +119,10 @@ auto compileDecision(const ExactPathDecision& decision)
     return CompiledEntryData{.path = decision.path(),
                              .kind = PackageEntryKind::Directory,
                              .origin = CompiledNamespaceEntryOrigin::MergedDirectories,
-                             .selected_claim = std::nullopt};
+                             .selected_claim = std::nullopt,
+                             .explanation_kind = NamespaceEntryExplanationKind::MergedDirectory,
+                             .contenders = decision.claims(),
+                             .explanation_selected_claim = std::nullopt};
   case ExactPathDecisionKind::PriorityWinner:
     if (!selected_claim.has_value() || selected_claim->gameRelativePath() != decision.path() ||
         selected_claim->kind() == PackageEntryKind::Directory) {
@@ -118,7 +131,10 @@ auto compileDecision(const ExactPathDecision& decision)
     return CompiledEntryData{.path = decision.path(),
                              .kind = selected_claim->kind(),
                              .origin = CompiledNamespaceEntryOrigin::PriorityWinner,
-                             .selected_claim = selected_claim};
+                             .selected_claim = selected_claim,
+                             .explanation_kind = NamespaceEntryExplanationKind::PriorityWinner,
+                             .contenders = decision.claims(),
+                             .explanation_selected_claim = selected_claim};
   case ExactPathDecisionKind::Unresolved:
     return invalidDecision();
   }
@@ -155,38 +171,66 @@ auto syntheticAncestors(const std::vector<ExactPathDecision>& decisions)
 
 auto CompiledNamespace::compile(const ConflictResolutionReport& report)
     -> std::expected<CompiledNamespace, NamespaceCompilationError> {
+  auto result = NamespaceCompilationResult::compile(report);
+  if (!result.has_value()) {
+    return std::unexpected(result.error());
+  }
+  return std::move(result->m_compiled_namespace);
+}
+
+auto NamespaceCompilationResult::compile(const ConflictResolutionReport& report)
+    -> std::expected<NamespaceCompilationResult, NamespaceCompilationError> {
   if (report.hasBlockingConflicts()) {
     return std::unexpected(
         NamespaceCompilationError{NamespaceCompilationErrorCode::BlockingConflicts});
   }
 
-  std::vector<CompiledNamespaceEntry> entries;
-  entries.reserve(report.decisions().size());
+  std::vector<CompiledEntryData> compilation_data;
+  compilation_data.reserve(report.decisions().size());
 
   for (const auto& decision : report.decisions()) {
     auto entry = compileDecision(decision);
     if (!entry.has_value()) {
       return std::unexpected(entry.error());
     }
-    entries.push_back(CompiledNamespaceEntry{std::move(entry->path), entry->kind, entry->origin,
-                                             std::move(entry->selected_claim)});
+    compilation_data.push_back(std::move(entry).value());
   }
 
   auto ancestors = syntheticAncestors(report.decisions());
-  entries.reserve(entries.size() + ancestors.size());
-  std::ranges::transform(ancestors, std::back_inserter(entries),
-                         [](GameRelativePath& ancestor) -> CompiledNamespaceEntry {
-                           return CompiledNamespaceEntry{
-                               std::move(ancestor), PackageEntryKind::Directory,
-                               CompiledNamespaceEntryOrigin::SyntheticDirectory, std::nullopt};
+  compilation_data.reserve(compilation_data.size() + ancestors.size());
+  std::ranges::transform(ancestors, std::back_inserter(compilation_data),
+                         [](GameRelativePath& ancestor) -> CompiledEntryData {
+                           return CompiledEntryData{
+                               .path = std::move(ancestor),
+                               .kind = PackageEntryKind::Directory,
+                               .origin = CompiledNamespaceEntryOrigin::SyntheticDirectory,
+                               .selected_claim = std::nullopt,
+                               .explanation_kind =
+                                   NamespaceEntryExplanationKind::SyntheticAncestorDirectory,
+                               .contenders = {},
+                               .explanation_selected_claim = std::nullopt};
                          });
 
-  std::ranges::sort(
-      entries, [](const CompiledNamespaceEntry& left, const CompiledNamespaceEntry& right) -> bool {
-        return bytesLess(left.path().nativeBytes(), right.path().nativeBytes());
-      });
+  std::ranges::sort(compilation_data,
+                    [](const CompiledEntryData& left, const CompiledEntryData& right) -> bool {
+                      return bytesLess(left.path.nativeBytes(), right.path.nativeBytes());
+                    });
 
-  return CompiledNamespace{std::move(entries)};
+  std::vector<CompiledNamespaceEntry> entries;
+  std::vector<NamespaceEntryExplanation> explanations;
+  entries.reserve(compilation_data.size());
+  explanations.reserve(compilation_data.size());
+  for (auto& data : compilation_data) {
+    auto explanation_path = data.path;
+    entries.push_back(CompiledNamespaceEntry{std::move(data.path), data.kind, data.origin,
+                                             std::move(data.selected_claim)});
+    explanations.push_back(NamespaceEntryExplanation{
+        std::move(explanation_path), data.explanation_kind, std::move(data.contenders),
+        std::move(data.explanation_selected_claim)});
+  }
+
+  return NamespaceCompilationResult{CompiledNamespace{std::move(entries)}, report,
+                                    std::move(explanations)};
 }
 
 auto CompiledNamespace::mapSources(const std::vector<NamespacePackagePlanRecord>& package_snapshot)

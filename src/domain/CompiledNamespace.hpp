@@ -10,6 +10,8 @@
 
 namespace fmm::domain {
 
+class NamespaceCompilationResult;
+
 class NamespaceSourceReference final {
 public:
   NamespaceSourceReference(PackageId package_id, PackageRelativePath package_relative_path,
@@ -83,6 +85,7 @@ public:
 
 private:
   friend class CompiledNamespace;
+  friend class NamespaceCompilationResult;
 
   CompiledNamespaceEntry(GameRelativePath path, PackageEntryKind kind,
                          CompiledNamespaceEntryOrigin origin,
@@ -197,10 +200,84 @@ public:
   auto operator==(const CompiledNamespace&) const -> bool = default;
 
 private:
+  friend class NamespaceCompilationResult;
+
   explicit CompiledNamespace(std::vector<CompiledNamespaceEntry> entries)
       : m_entries(std::move(entries)) {}
 
   std::vector<CompiledNamespaceEntry> m_entries;
+};
+
+enum class NamespaceEntryExplanationKind : std::uint8_t {
+  UncontestedClaim,
+  MergedDirectory,
+  PriorityWinner,
+  SyntheticAncestorDirectory,
+};
+
+class NamespaceEntryExplanation final {
+public:
+  [[nodiscard]] auto path() const noexcept -> const GameRelativePath& { return m_path; }
+
+  [[nodiscard]] auto kind() const noexcept -> NamespaceEntryExplanationKind { return m_kind; }
+
+  [[nodiscard]] auto contenders() const noexcept -> const std::vector<PackagePathClaim>& {
+    return m_contenders;
+  }
+
+  [[nodiscard]] auto selectedClaim() const noexcept -> const std::optional<PackagePathClaim>& {
+    return m_selected_claim;
+  }
+
+  auto operator==(const NamespaceEntryExplanation&) const -> bool = default;
+
+private:
+  friend class NamespaceCompilationResult;
+
+  NamespaceEntryExplanation(GameRelativePath path, NamespaceEntryExplanationKind kind,
+                            std::vector<PackagePathClaim> contenders,
+                            std::optional<PackagePathClaim> selected_claim)
+      : m_path(std::move(path)), m_kind(kind), m_contenders(std::move(contenders)),
+        m_selected_claim(std::move(selected_claim)) {}
+
+  GameRelativePath m_path;
+  NamespaceEntryExplanationKind m_kind;
+  std::vector<PackagePathClaim> m_contenders;
+  std::optional<PackagePathClaim> m_selected_claim;
+};
+
+class NamespaceCompilationResult final {
+public:
+  [[nodiscard]] static auto compile(const ConflictResolutionReport& report)
+      -> std::expected<NamespaceCompilationResult, NamespaceCompilationError>;
+
+  [[nodiscard]] auto compiledNamespace() const noexcept -> const CompiledNamespace& {
+    return m_compiled_namespace;
+  }
+
+  [[nodiscard]] auto conflictReport() const noexcept -> const ConflictResolutionReport& {
+    return m_conflict_report;
+  }
+
+  [[nodiscard]] auto explanations() const noexcept
+      -> const std::vector<NamespaceEntryExplanation>& {
+    return m_explanations;
+  }
+
+  auto operator==(const NamespaceCompilationResult&) const -> bool = default;
+
+private:
+  friend class CompiledNamespace;
+
+  NamespaceCompilationResult(CompiledNamespace compiled_namespace,
+                             ConflictResolutionReport conflict_report,
+                             std::vector<NamespaceEntryExplanation> explanations)
+      : m_compiled_namespace(std::move(compiled_namespace)),
+        m_conflict_report(std::move(conflict_report)), m_explanations(std::move(explanations)) {}
+
+  CompiledNamespace m_compiled_namespace;
+  ConflictResolutionReport m_conflict_report;
+  std::vector<NamespaceEntryExplanation> m_explanations;
 };
 
 } // namespace fmm::domain
