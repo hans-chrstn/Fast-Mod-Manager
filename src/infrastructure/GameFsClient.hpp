@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/GameFsPlan.hpp"
+#include "core/LegacyGameFsAbiPlan.hpp"
 
 extern "C" {
 struct FmmContext;
@@ -49,7 +49,7 @@ public:
   GameFsClient(const GameFsClient&) = delete;
   auto operator=(const GameFsClient&) -> GameFsClient& = delete;
 
-  [[nodiscard]] auto applyPlan(const core::GameFsPlan& plan) const -> bool;
+  [[nodiscard]] auto applyPlan(const core::LegacyGameFsAbiPlan& plan) const -> bool;
 
 private:
   FmmContext* handle_{};

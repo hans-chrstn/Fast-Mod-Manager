@@ -20,9 +20,9 @@ TEST_CASE("Rust C ABI Boundary: GameFsClient lifecycle", "[rust][abi]") {
     SUCCEED("Move semantics did not trigger double-free or crash");
   }
 
-  SECTION("Can pass a GameFsPlan across the C ABI") {
+  SECTION("Can pass the legacy plan scaffold across the C ABI") {
     GameFsClient client;
-    fmm::core::GameFsPlan plan;
+    fmm::core::LegacyGameFsAbiPlan plan;
     plan.profile_id = "test_profile";
     plan.target_game_directory = "/tmp/fake_game";
     plan.deployed_files = {"/tmp/fake_game/mod.dll", "/tmp/fake_game/Data/textures.pak"};
@@ -33,7 +33,7 @@ TEST_CASE("Rust C ABI Boundary: GameFsClient lifecycle", "[rust][abi]") {
 
   SECTION("Empty plan is handled safely") {
     GameFsClient client;
-    fmm::core::GameFsPlan plan;
+    fmm::core::LegacyGameFsAbiPlan plan;
     plan.profile_id = "empty";
     plan.target_game_directory = "/tmp/empty";
 

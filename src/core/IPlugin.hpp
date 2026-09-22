@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/GameFsPlan.hpp"
 #include "core/LaunchPlan.hpp"
+#include "core/LegacyGameFsAbiPlan.hpp"
 #include "domain/PackagePlan.hpp"
 
 #include <QtPlugin>
@@ -17,7 +17,7 @@ public:
   virtual void initialize() = 0;
 
   virtual void contributePackagePlan(domain::PackagePlan& plan) = 0;
-  virtual void contributeGameFsPlan(GameFsPlan& plan) = 0;
+  virtual void contributeGameFsPlan(LegacyGameFsAbiPlan& plan) = 0;
   virtual void contributeLaunchPlan(LaunchPlan& plan) = 0;
 };
 

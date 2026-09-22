@@ -5,7 +5,7 @@
 #include <vector>
 namespace fmm::infrastructure {
 
-auto GameFsClient::applyPlan(const core::GameFsPlan& plan) const -> bool {
+auto GameFsClient::applyPlan(const core::LegacyGameFsAbiPlan& plan) const -> bool {
   if (handle_ == nullptr) {
     return false;
   }

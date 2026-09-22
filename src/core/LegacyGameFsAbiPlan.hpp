@@ -5,7 +5,7 @@
 
 namespace fmm::core {
 
-struct GameFsPlan {
+struct LegacyGameFsAbiPlan {
   std::string profile_id;
   std::string target_game_directory;
   std::vector<std::string> deployed_files;
